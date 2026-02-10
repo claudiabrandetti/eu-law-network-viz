@@ -3,3 +3,5 @@ networkx
 plotly
 matplotlib
 tqdm
+nbformat
+seaborn
