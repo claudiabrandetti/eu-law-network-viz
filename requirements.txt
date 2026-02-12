@@ -6,3 +6,5 @@ tqdm
 nbformat
 seaborn
 community
+scipy
+shapely
