@@ -7,4 +7,4 @@ nbformat
 seaborn
 community
 scipy
-shapely
+python-louvain
