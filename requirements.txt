@@ -1,10 +1,6 @@
 pandas
-networkx
 plotly
 matplotlib
 tqdm
 nbformat
 seaborn
-community
-scipy
-python-louvain
