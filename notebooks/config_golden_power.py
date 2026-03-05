@@ -104,16 +104,17 @@ EUROVOC_KEYWORDS = {
     "information security": "Reg. 2019/452 art. 4(1)(c) — cybersecurity",
 
     # SETTORE FINANZIARIO
-    # Fonte: D.L. 21/2012, art. 2, co. 1, lett. f) (come modificato nel 2020)
-    # e Reg. 2019/452, art. 4, par. 1, lett. e) — "financial infrastructure"
-    "financial institution": "D.L. 21/2012 art. 2(1)(f); Reg. 2019/452 art. 4(1)(e)",
+    # Fonte: Reg. 2019/452, art. 4, par. 1, lett. e) — "financial infrastructure"
+    "financial institution": "Reg. 2019/452 art. 4(1)(e) — financial infrastructure; "
+                         "confermato da D.L. 21/2012 art. 2(1)(f)",
     "direct investment":     "Reg. 2019/452, definizione art. 2 — oggetto principale",
     "foreign investment":    "Reg. 2019/452, definizione art. 2",
     "free movement of capital": "TFUE art. 63 — principio che il Golden Power deroga",
 
     # SETTORE AGROALIMENTARE
-    # Fonte: D.L. 21/2012, art. 2, co. 1, lett. g) (aggiunto nel 2020)
-    "food supply":          "D.L. 21/2012 art. 2(1)(g) — filiera agroalimentare",
+    # Fonte: Reg. 2019/452, Allegato — "food security" è citata esplicitamente
+    # tra i settori strategici soggetti a screening FDI
+    "food supply":          "Reg. 2019/452 Allegato, punto 6 — food security",
 
     # SETTORE TECNOLOGIA E RICERCA
     # Fonte: Reg. 2019/452, art. 4, par. 1, lett. d) — "technologies"

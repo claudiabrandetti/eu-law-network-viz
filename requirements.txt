@@ -1,6 +1,4 @@
 pandas
-plotly
-matplotlib
-tqdm
-nbformat
-seaborn
+networkx
+numpy
+requests
