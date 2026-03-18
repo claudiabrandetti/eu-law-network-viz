@@ -195,3 +195,12 @@ N_HOPS = 1
 
 EXPAND_OUTGOING = True   # atti citati DAI seed
 EXPAND_INCOMING = True   # atti che CITANO i seed
+
+# ── Nomi file output ─────────────────────────────────────────────────────────
+NODES_FOCAL       = 'nodes_focal.csv'           # output 02
+EDGES_FOCAL       = 'edges_focal.csv'           # output 02
+NODES_TEXTS       = 'nodes_texts.csv'           # output 03
+NODES_LAYERS      = 'nodes_layers.csv'          # output 04
+LAYER_MAPPING     = 'layer_mapping.csv'         # output 04
+TEXTS_CHECKPOINT  = 'texts_checkpoint.csv'
+FUNC_CHECKPOINT   = 'functional_features_checkpoint.csv'

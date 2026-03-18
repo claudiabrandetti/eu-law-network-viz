@@ -1,6 +1,15 @@
 pandas
 networkx
 numpy
-requests
 beautifulsoup4
+eurlex
+sentence-transformers
+scikit-learn
+scipy
+umap-learn
+hdbscan
 openai
+dash
+dash-cytoscape
+plotly
+python-dotenv
