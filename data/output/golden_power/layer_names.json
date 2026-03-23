@@ -1,0 +1,14 @@
+{
+  "names": {
+    "L1": "Constitutional and Procedural Framework",
+    "L2": "Commission Implementation and Delegation Layer",
+    "L3": "Council Implementation and Operational Decisions",
+    "L4": "Technical Implementation and Amendment Layer"
+  },
+  "rationale": {
+    "L1": "This name fits because the cluster is dominated by apex-level Treaties and foundational Regulations that establish core institutional rules and procedures, as evidenced by the high proportion of Treaty acts, the presence of key procedural regulations like the Comitology Regulation, and its role as a major citation source for lower layers with minimal reciprocal citation.",
+    "L2": "This name reflects the cluster's normative role as a body of Commission acts (primarily implementing and delegated regulations) that operationalize higher-level legislation through technical rules and administrative procedures.",
+    "L3": "This name reflects the cluster's normative role as predominantly Council-adopted decisions (87% Council, 67% Decisions) with high outdegree citation flow to L1 apex acts (1567 citations), indicating they implement higher-level policies through specific operational measures.",
+    "L4": "This name fits because the cluster's high outdegree citation ratio (10.22), predominant amending function (1.74 amends_sent per act), and composition of implementing/delegated acts (31%) indicate its primary normative role is to provide detailed technical rules and modify existing legislation rather than establish new policy frameworks."
+  }
+}
