@@ -172,30 +172,6 @@ EXCLUDED_DOMAINS = {
 }
 
 
-# ==============================================================================
-# LIVELLO 3: ESPANSIONE PER CITAZIONE
-# ==============================================================================
-# Parametro: numero di hop (salti) dall'insieme seed.
-#
-# SCELTA: N_HOPS = 1
-# MOTIVAZIONE: Un atto normativo cita quasi sempre i propri fondamenti diretti
-# (L2 cita L1, L3 cita L1 e L2). Con 1 hop catturiamo il contesto normativo
-# immediato senza includere l'intero corpus UE per transitività.
-# Con 2 hop la rete si espanderebbe a decine di migliaia di nodi perdendo
-# la specificità tematica (verificato empiricamente: con 1 hop = ~5.500 nodi,
-# con 2 hop stimato > 20.000 nodi).
-
-N_HOPS = 1
-
-# DIREZIONE DELL'ESPANSIONE:
-# EXPAND_OUTGOING = True  → includi atti CITATI dai seed (es. le basi giuridiche)
-# EXPAND_INCOMING = True  → includi atti che CITANO i seed (es. atti attuativi)
-# Entrambe le direzioni sono necessarie per catturare sia la gerarchia verticale
-# (L1 → L2 → L3) sia l'enforcement (L4 → tutti).
-
-EXPAND_OUTGOING = True   # atti citati DAI seed
-EXPAND_INCOMING = True   # atti che CITANO i seed
-
 # ── Nomi file output ─────────────────────────────────────────────────────────
 NODES_FOCAL       = 'nodes_focal.csv'           # output 02
 EDGES_FOCAL       = 'edges_focal.csv'           # output 02
