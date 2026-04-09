@@ -1,0 +1,372 @@
+src_slug,src_urn,dst_urn,dst_slug,testo_rif,interno
+dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:costituzione:1947-12-27,,articoli 76,False
+dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:legge:1988-08-23;400,,"articolo 14 della legge 23 agosto 1988, n. 400",False
+dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:legge:2012-12-24;234,,"legge 24 dicembre 2012, n. 234",False
+dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:decreto.legislativo:2016-04-18;50,dlgs_50_2016,"decreto legislativo 18 aprile 2016, n. 50",True
+dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,Codice dei contratti pubblici,True
+dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:legge:2022-06-21;78,l_78_2022,"legge 21 giugno 2022, n. 78",True
+dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:regio.decreto:1924-06-26;1054,,"regio decreto 26 giugno 1924, n. 1054",False
+dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:decreto.legislativo:2023-01-26;281,,"articolo 8 del decreto legislativo 28 agosto 1997, n. 281, reso in data 26 gennaio 2023",False
+dlgs_50_2016,urn:nir:stato:decreto.legislativo:2016-04-18;50,urn:nir:stato:decreto.legislativo:2005;189,,d.lgs. n. 189/2005,False
+dlgs_50_2016,urn:nir:stato:decreto.legislativo:2016-04-18;50,urn:nir:stato:decreto.legislativo:1995;157,,"d.lgs.
+n. 157/1995",False
+dlgs_50_2016,urn:nir:stato:decreto.legislativo:2016-04-18;50,urn:nir:stato:decreto.legislativo:1995;158,,d.lgs. n. 158/1995,False
+dlgs_50_2016,urn:nir:stato:decreto.legislativo:2016-04-18;50,urn:nir:stato:decreto.legislativo:2002;190,,d.lgs. n. 190/2002,False
+dlgs_50_2016,urn:nir:stato:decreto.legislativo:2016-04-18;50,urn:nir:stato:decreto.del.presidente.della.repubblica:1999;554,,d.P.R. n. 554/1999,False
+dlgs_50_2016,urn:nir:stato:decreto.legislativo:2016-04-18;50,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+dlgs_50_2016,urn:nir:stato:decreto.legislativo:2016-04-18;50,urn:nir:stato:legge:1994;109,,legge n. 109/1994,False
+dlgs_50_2016,urn:nir:stato:decreto.legislativo:2016-04-18;50,urn:nir:stato:legge:2009;88,,legge n. 88/2009,False
+dlgs_50_2016,urn:nir:stato:decreto.legislativo:2016-04-18;50,urn:nir:stato:decreto.legislativo:2023-03-31;36,dlgs_36_2023,"D.LGS. 31 MARZO 2023, N. 36",True
+dlgs_50_2016,urn:nir:stato:decreto.legislativo:2016-04-18;50,urn:nir:stato:decreto.legislativo:2016;50,,decreto legislativo n. 50 del 2016,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:1995;158,,decreto legislativo n. 158/1995,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:2002;190,,decreto legislativo n. 190/2002,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:1998;402,,decreto legislativo n. 402/1998,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:1992;358,,decreto legislativo n. 358/1992,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:1989;271,,decreto legislativo n. 271/1989,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:1995;157,,d.lgs. n. 157/1995,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:2004;30,,d.lgs. n. 30/2004,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:1995;358,,d.lgs. n. 358/1995,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:1991;406,,d.lgs. n. 406/1991,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:2005;189,,d.lgs. n. 189/2005,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:2005;9,,d.lgs. n. 9/2005,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.del.presidente.della.repubblica:1999;554,,decreto del Presidente della Repubblica n. 554/1999,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.del.presidente.della.repubblica:1994;573,,decreto del Presidente della Repubblica n. 573/1994,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.del.presidente.della.repubblica:2001;384,,decreto del Presidente della Repubblica n. 384/2001,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.del.presidente.della.repubblica:2005;170,,d.P.R. n. 170/2005,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.del.presidente.della.repubblica:2000;34,,d.P.R. n. 34/2000,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.del.presidente.della.repubblica:2002;101,,d.P.R. n. 101/2002,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legge:2005;35,,decreto-legge n. 35/2005,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legge:2005;63,,d.l. n. 63/2005,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:1994;109,,legge n. 109/1994,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:2004;62,,legge n. 62/2004,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:1993;537,,legge n. 537/1993,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:2005;62,,legge n. 62/2005,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:1994;20,,legge n. 20/1994,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:1990;241,,legge n. 241/1990,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:2002;289,,legge n. 289/2002,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:1998;415,,legge n. 415/1998,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:1990;55,,legge n. 55/1990,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:1998;128,,legge n. 128/1998,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:2000;327,,legge n. 327/2000,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:2005;266,,legge n. 266/2005,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:2005;109,,legge n. 109/2005,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:2005;35,,legge n. 35/2005,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:2005;80,,legge n. 80/2005,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:1997;79,,legge n. 79/1997,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:1997;140,,legge n. 140/1997,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:2000;205,,legge n. 205/2000,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:legge:1971;1034,,legge n. 1034/1971,False
+dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:2016-04-18;50,dlgs_50_2016,"D.LGS. 18 APRILE 2016, N. 50",True
+dlgs_209_2024,urn:nir:stato:decreto.legislativo:2024-12-31;209,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+dlgs_209_2024,urn:nir:stato:decreto.legislativo:2024-12-31;209,urn:nir:stato:costituzione:1947-12-27,,articoli 76,False
+dlgs_209_2024,urn:nir:stato:decreto.legislativo:2024-12-31;209,urn:nir:stato:legge:1988-08-23;400,,"legge 23 agosto 1988, n. 400",False
+dlgs_209_2024,urn:nir:stato:decreto.legislativo:2024-12-31;209,urn:nir:stato:legge:2022-06-21;78,l_78_2022,"legge 21 giugno 2022, n. 78",True
+dlgs_209_2024,urn:nir:stato:decreto.legislativo:2024-12-31;209,urn:nir:stato:decreto.legislativo:2023-03-31;36,dlgs_36_2023,"decreto legislativo 31 marzo 2023, n. 36",True
+dlgs_209_2024,urn:nir:stato:decreto.legislativo:2024-12-31;209,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,Codice dei contratti pubblici,True
+dlgs_209_2024,urn:nir:stato:decreto.legislativo:2024-12-31;209,urn:nir:stato:decreto.legislativo:2024-12-03;281,,"articolo 8 del decreto legislativo 28 agosto 1997, n. 281, reso in data 3 dicembre 2024",False
+dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:decreto.legislativo:2001;231,,decreto legislativo n. 231/2001,False
+dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:costituzione:1947-12-27,,articoli 76,False
+dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:legge:1988-08-23;400,,"articolo 14 della legge 23 agosto 1988, n. 400",False
+dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:legge:2016-01-28;11,l_11_2016,"legge 28 gennaio 2016, n. 11",True
+dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:decreto.legislativo:2016-04-18;50,dlgs_50_2016,"decreto legislativo 18 aprile 2016, n. 50",True
+dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:decreto.legislativo:1997-08-28;281,,"articolo 8 del decreto legislativo 28 agosto 1997, n. 281",False
+dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,Codice dei contratti pubblici,True
+dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:presidente.repubblica:decreto:1985-12-28;1092,,"D.P.R. 28 dicembre 1985, n.1092",False
+dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:legge:2009-12-31;196,,"articolo 17, comma 3, della legge 31 dicembre 2009, n. 196",False
+dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:legge:1990-06-08;142,,"articolo 17 della legge 8 giugno 1990, n. 142",False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:decreto.legislativo:2016;50,,decreto legislativo n. 50/2016,False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:decreto.legislativo:2006;152,,decreto legislativo n. 152/2006,False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:decreto.del.presidente.della.repubblica:2000;445,,d.P.R. n. 445/2000,False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:decreto.legge:2022;50,,decreto-legge n. 50/2022,False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:legge:2022;50,,legge n. 50/2022,False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:decreto.legislativo:1997-08-28;281,,"articolo 8 del decreto legislativo 28 agosto 1997, n. 281, e del parere",False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:regio.decreto:1924-06-26;1054,,"regio decreto 26 giugno 1924, n. 1054",False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:legge:2009-12-31;196,,"articolo 17, comma 2, della legge 31 dicembre 2009, n. 196",False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:presidente.repubblica:decreto:1985-12-28;1092,,"decreto del Presidente della Repubblica 28 dicembre 1985, n. 1092",False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir::regolamento:2019;2088,,regolamento (UE) 2019/2088,False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:legge:2013;198,,L 198/13,False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:legge:1965;94,,L 94/65,False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:stato:legge:1990-06-08;142,,"articolo 17 della legge 8 giugno 1990, n. 142",False
+l_78_2022,urn:nir:stato:legge:2022-06-21;78,urn:nir:::1907-08-17;638,,"Art. 10 del testo unico 17 agosto 1907, n. 638",False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legislativo:1995;194,,decreto legislativo 194/1995,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legislativo:2006;163,,decreto legislativo n. 163/2006,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legislativo:2011;229,,"decreto legislativo
+n. 229/2011",False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legge:2006;262,,decreto-legge n. 262/2006,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legge:2014;90,,decreto-legge n. 90/2014,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legge:2011;98,,decreto-legge n. 98/2011,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legge:2008;59,,decreto-legge n. 59/2008,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:2001;443,,legge n. 443/2001,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:2006;262,,legge n. 262/2006,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:2014;90,,legge n. 90/2014,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:2014;190,,legge n. 190/2014,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:1999;144,,legge n. 144/1999,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:2011;98,,legge n. 98/2011,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:2011;214,,legge n. 214/2011,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:2008;59,,legge n. 59/2008,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:2012-12-24;234,,"articolo 32 della legge 24 dicembre 2012, n. 234",False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:2005-11-28;246,,"articolo 14, commi 24-ter",False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,codice dei contratti pubblici,True
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legislativo:2004-01-22;42,,codice dei beni culturali e del paesaggio,False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:2001-12-21;443,,"comma 1 dell'articolo 1 della legge 21 dicembre 2001, n. 443",False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:regio.decreto:1942-03-16;267,,"articolo 161, sesto comma, del regio decreto 16 marzo 1942, n. 267",False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legislativo:2010-07-02;104,,"articolo 121, comma 1, del codice del processo amministrativo",False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legislativo:2011-12-29;228,dlgs_228_2011,"articolo 2 del decreto legislativo 29 dicembre 2011, n. 228",True
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legislativo:2006-04-03;152,,"decreto legislativo 3 aprile 2006, n. 152",False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:legge:2009-12-31;196,,"articolo 17, comma 3, della legge 31 dicembre 2009, n. 196",False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legislativo:1997-08-28;281,,"articolo 8 del decreto legislativo 28 agosto 1997, n. 281",False
+l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:presidente.repubblica:decreto:2010-10-05;207,,"decreto del Presidente della Repubblica 5 ottobre 2010, n. 207",False
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:decreto.legislativo:1995;157,,decreto legislativo n. 157/1995,False
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:decreto.del.presidente.della.repubblica:2000;34,,"D.P.R.
+N. 34/2000",False
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:decreto.del.presidente.della.repubblica:2000;445,,d.P.R. 445/2000,False
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:costituzione:1947-12-27,,"articolo 87, quinto comma, della Costituzione",False
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,"articolo 5 del decreto legislativo 12 aprile 2006, n. 163",True
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:legge:1988-08-23;400,,"articolo 17, comma 1, della legge 23 agosto 1988, n. 400",False
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:decreto.legislativo:1997-08-28;281,,"articolo 8 del decreto legislativo 28 agosto 1997, n. 281",False
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:legge:1987-02-26;49,,"legge 26 febbraio 1987, n. 49",False
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:decreto.legislativo:2016-04-18;50,dlgs_50_2016,"D.LGS. 18 APRILE 2016, N. 50",True
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:legge:2014-08-11;125,,"L. 11 agosto 2014, n. 125",False
+dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:presidente.repubblica:decreto:2010-10-05;207,,"decreto del Presidente della Repubblica 5 ottobre 2010, n. 207",False
+l_108_2021,urn:nir:stato:legge:2021-07-29;108,urn:nir:stato:decreto.legge:2021-05-31;77,,"decreto-legge 31 maggio 2021, n. 77",False
+l_108_2021,urn:nir:stato:legge:2021-07-29;108,urn:nir:stato:decreto.legge:2021-05-06;59,,"decreto-legge 6 maggio 2021, n. 59",False
+l_108_2021,urn:nir:stato:legge:2021-07-29;108,urn:nir:stato:legge:2021-07-01;101,,"legge 1° luglio 2021, n. 101",False
+l_108_2021,urn:nir:stato:legge:2021-07-29;108,urn:nir:stato:legge:1988-08-23;400,,"art. 15, comma 5, della legge 23 agosto 1988, n. 400",False
+l_120_2020,urn:nir:stato:legge:2020-09-11;120,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+l_120_2020,urn:nir:stato:legge:2020-09-11;120,urn:nir:stato:decreto.legge:2020-07-16;76,,"decreto-legge 16 luglio 2020, n. 76",False
+l_120_2020,urn:nir:stato:legge:2020-09-11;120,urn:nir:presidente.repubblica:decreto:1986-03-14;217,,"decreto del Presidente della Repubblica 14 marzo 1986, n. 217",False
+l_120_2020,urn:nir:stato:legge:2020-09-11;120,urn:nir:presidente.repubblica:decreto:1985-12-28;1092,,"art. 10, commi 2",False
+l_55_2019,urn:nir:stato:legge:2019-06-14;55,urn:nir:stato:decreto.legislativo:2000;267,,"decreto
+legislativo n. 267/2000",False
+l_55_2019,urn:nir:stato:legge:2019-06-14;55,urn:nir:stato:decreto.legislativo:2011;159,,decreto legislativo n. 159/2011,False
+l_55_2019,urn:nir:stato:legge:2019-06-14;55,urn:nir:stato:decreto.legislativo:2006;219,,decreto legislativo n. 219/2006,False
+l_55_2019,urn:nir:stato:legge:2019-06-14;55,urn:nir:stato:decreto.legge:2012;158,,decreto-legge n. 158/2012,False
+l_55_2019,urn:nir:stato:legge:2019-06-14;55,urn:nir:stato:legge:1975;400,,legge n. 400/1975,False
+l_55_2019,urn:nir:stato:legge:2019-06-14;55,urn:nir:stato:legge:2012;158,,legge n. 158/2012,False
+l_55_2019,urn:nir:stato:legge:2019-06-14;55,urn:nir:stato:legge:2012;189,,legge n. 189/2012,False
+l_55_2019,urn:nir:stato:legge:2019-06-14;55,urn:nir:stato:decreto.legge:2019-04-18;32,,"decreto-legge 18 aprile 2019, n. 32",False
+l_55_2019,urn:nir:stato:legge:2019-06-14;55,urn:nir:presidente.repubblica:decreto:1986-03-14;217,,"decreto del Presidente della Repubblica 14 marzo 1986, n. 217",False
+l_55_2019,urn:nir:stato:legge:2019-06-14;55,urn:nir:presidente.repubblica:decreto:1985-12-28;1092,,"art. 10, commi 2",False
+l_114_2014,urn:nir:stato:legge:2014-08-11;114,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+l_114_2014,urn:nir:stato:legge:2014-08-11;114,urn:nir:stato:decreto.legge:2014-06-24;90,,"decreto-legge 24 giugno 2014, n. 90",False
+l_114_2014,urn:nir:stato:legge:2014-08-11;114,urn:nir:stato:legge:1988-08-23;400,,"art. 15, comma 5, della legge 23 agosto 1988, n. 400",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2002;190,,D.Lgs. n. 190/2002,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2006;163,,d.lgs. n. 163/2006,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2008;81,,d.lgs 81/2008,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.del.presidente.della.repubblica:1998;38,,"decreto del Presidente della
+Repubblica n. 38/1998",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.del.presidente.della.repubblica:1999;554,,D.P.R. n. 554/1999,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.del.presidente.della.repubblica:2010;207,,d.P.R. n. 207/2010,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.del.presidente.della.repubblica:2000;34,,d.P.R. n. 34/2000,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.del.presidente.della.repubblica:2000;445,,d.P.R. n. 445/2000,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legge:2011;70,,decreto-legge 70/2011,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legge:2005;35,,D.L. n. 35/2005,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2009;88,,legge n. 88/2009,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:1994;109,,legge n. 109/1994,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2005;62,,legge n. 62/2005,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2011;70,,legge 70/2011,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2011;106,,legge n. 106/2011,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2009;2,,legge n. 2/2009,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2009-08-03;116,,"legge 3 agosto 2009, n. 116, e degli articoli 20",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2012-06-28;110,,"legge 28 giugno 2012, n.110",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2009-10-27;150,,"articolo 13 del decreto legislativo 27 ottobre 2009, n.150",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2001-03-30;165,,"articolo 53 del decreto legislativo 30 marzo 2001, n.165",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2016-04-18;50,dlgs_50_2016,"D.LGS. 18 APRILE 2016, N. 50",True
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2017-04-19;56,dlgs_56_2017,"D.LGS. 19 APRILE 2017, N. 56",True
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:1997-08-28;281,,"articolo 8, comma 1, del decreto legislativo 28 agosto 1997, n. 281",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2013-03-14;33,dlgs_33_2013,"articolo 2-bis, comma 2, del decreto legislativo 14 marzo 2013, n. 33",True
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2001-06-08;231,,"decreto legislativo 8 giugno 2001, n. 231",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2016-05-25;97,dlgs_97_2016,"D.LGS. 25 MAGGIO 2016, N. 97",True
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:1990-08-07;241,l_241_1990,"articolo 15 della legge 7 agosto 1990, n. 241",True
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2013-04-08;39,,"comma 3, articolo 15, decreto legislativo 8 aprile 2013, n. 39",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:costituzione:1947-12-27,,"articolo 117, secondo comma, lettera m), della Costituzione",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2005-03-07;82,,articolo 54 del codice dell'amministrazione digitale,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2009-06-18;69,,"articolo 21 della legge 18 giugno 2009, n. 69",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,codice dei contratti pubblici,True
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2009;150,,decreto legislativo n.150 del 2009,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:presidente.repubblica:decreto:2000-12-28;445,,articolo 38 del testo unico delle disposizioni legislative e regolamentari in materia di documentazione amministrativa,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2016-01-22;10,,"D.LGS. 22 GENNAIO 2016, N. 10",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2023-03-31;36,dlgs_36_2023,"D.LGS. 31 MARZO 2023, N. 36",True
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2010-07-02;104,,"decreto legislativo 2 luglio 2010, n. 104",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2009-12-20;198,,"articolo 1, comma 1, del decreto legislativo 20 dicembre 2009, n. 198",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:codice.civile:1942-03-16;262,,articolo 2359 del codice civile,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2001;165,,decreto legislativo n. 165 del 2001,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:1988-08-23;400,,"articolo 17, comma 2, della legge 23 agosto 1988, n. 400",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:codice.penale:1930-10-19;1398,,codice penale,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2011-09-06;159,,"decreto legislativo 6 settembre 2011, n. 159",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2011;159,,decreto legislativo n. 159 del 2011,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legge:2020-04-08;23,,"D.L. 8 APRILE 2020, N. 23",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2020-06-05;40,,"L. 5 GIUGNO 2020, N. 40",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:1998-02-24;58,,"decreto legislativo 24 febbraio 1998, n. 58",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:1994-01-14;20,,"legge 14 gennaio 1994, n. 20",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legge:1993-11-15;453,,"articolo 5, comma 2, del decreto-legge 15 novembre 1993, n. 453",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:1994-01-14;19,,"legge 14 gennaio 1994, n. 19",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2000-08-18;267,,"decreto legislativo 18 agosto 2000, n.267",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:presidente.repubblica:codice.procedura.penale:1988-09-22;447,,"articolo 51, commi 3-bis",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2000;267,,decreto legislativo n. 267 del 2000,False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2009-12-31;196,,"articolo 17, comma 3, della legge 31 dicembre 2009, n. 196",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legge:2021-05-06;59,,"articolo 1 del decreto-legge 6 maggio 2021, n. 59",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2021-07-01;101,,"legge 1° luglio 2021, n. 101",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legge:2008-09-16;143,,"comma 4 dell'articolo 1-bis del decreto-legge 16 settembre 2008, n. 143",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2008-11-13;181,,"legge 13 novembre 2008, n. 181",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:1989-07-28;271,,"decreto legislativo 28 luglio 1989, n. 271",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legge:1992-06-08;306,,"articolo 12-sexies del decreto-legge 8 giugno 1992, n. 306",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:1992-08-07;356,,"legge 7 agosto 1992, n.356",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2001-03-27;97,,"articolo 3, comma 1, della legge 27 marzo 2001, n. 97",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legge:2012-10-18;179,,"D.L. 18 ottobre 2012, n. 179",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2012-12-17;221,,"L. 17 dicembre 2012, n. 221",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2012-12-24;228,,"L. 24 dicembre 2012, n. 228",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legge:2014-06-24;90,,"D.L. 24 giugno 2014, n. 90",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2014-08-11;114,l_114_2014,"L. 11 agosto 2014, n. 114",True
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2012;190,,"articolo 1, comma 66, della legge n. 190 del 2012",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:presidente.repubblica:decreto:2022-06-24;81,,"D.P.R. 24 giugno 2022, n. 81",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legge:2021-06-09;80,,"articolo 6, comma 1, del decreto-legge 9 giugno 2021, n. 80",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2021-08-06;113,,"legge 6 agosto 2021, n. 113",False
+l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2023-02-24;14,,"L. 24 febbraio 2023, n. 14",False
+l_90_2024,urn:nir:stato:legge:2024-06-28;90,urn:nir:stato:decreto.legge:2020;34,,decreto-legge n. 34/2020,False
+l_90_2024,urn:nir:stato:legge:2024-06-28;90,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+l_90_2024,urn:nir:stato:legge:2024-06-28;90,urn:nir:stato:legge:2020;34,,legge n. 34/2020,False
+l_90_2024,urn:nir:stato:legge:2024-06-28;90,urn:nir:stato:legge:2009-12-31;196,,"articolo 1, comma 3, della legge 31 dicembre 2009, n. 196",False
+l_90_2024,urn:nir:stato:legge:2024-06-28;90,urn:nir:stato:decreto.legislativo:2018-05-18;65,,"articolo 18, commi 3",False
+l_90_2024,urn:nir:stato:legge:2024-06-28;90,urn:nir:stato:decreto.legge:2021-06-14;82,,"articolo 17, comma 4-quater, del decreto-legge 14 giugno 2021, n. 82",False
+l_90_2024,urn:nir:stato:legge:2024-06-28;90,urn:nir:stato:legge:2021-08-04;109,,"legge 4 agosto 2021, n. 109",False
+l_90_2024,urn:nir:stato:legge:2024-06-28;90,urn:nir:stato:decreto.legge:2019-09-21;105,,"articolo 1, comma 2-bis, del decreto-legge 21 settembre 2019, n. 105",False
+l_90_2024,urn:nir:stato:legge:2024-06-28;90,urn:nir:stato:legge:2019-11-18;133,,"legge 18 novembre 2019, n. 133",False
+l_90_2024,urn:nir:stato:legge:2024-06-28;90,urn:nir:stato:legge:2007-08-03;124,,articoli 4,False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:decreto.del.presidente.della.repubblica:1996;317,,Decreto del Presidente della Repubblica n. 317/1996,False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:decreto.legge:2001;351,,decreto-legge n. 351/2001,False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:legge:2001;351,,legge n. 351/2001,False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:legge:2001;410,,legge n. 410/2001,False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:legge:1982-09-13;646,,"articolo 23-bis della legge 13 settembre 1982, n. 646",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:presidente.repubblica:codice.procedura.penale:1988-09-22;447,,codice di procedura penale,False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:decreto.legislativo:1989-07-28;271,,"decreto legislativo 28 luglio 1989, n. 271",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:decreto.legislativo:2004-01-22;42,,"articolo 10, comma 3, del codice dei beni culturali e del paesaggio",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:presidente.repubblica:decreto:1986-12-22;917,,"decreto del Presidente della Repubblica 22 dicembre 1986, n. 917",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:legge:2009-12-31;196,,"articolo 17, comma 3, della legge 31 dicembre 2009, n. 196",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:presidente.repubblica:decreto:1985-12-28;1092,,"D.P.R. 28 dicembre 1985, n. 1092",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:legge:1965-05-31;575,,"leggi 27 dicembre 1956, n. 1423, 10 febbraio 1962, n. 57 e 31 maggio 1965, n. 575",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:codice.penale:1930-10-19;1398,,art. 416-bis del codice penale,False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:legge:1975-12-22;685,,"art. 75 della legge 22 dicembre 1975, n. 685",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:legge:1975-07-26;354,,"art. 41-bis, comma 2, della legge 26 luglio 1975, n. 354",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:legge:2006-03-16;146,,"art. 9 della legge 16 marzo 2006, n. 146",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:decreto.legge:1991-01-15;8,,"art. 13, comma 1, del decreto-legge 15 gennaio 1991, n. 8",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:legge:1991-03-15;82,,"legge 15 marzo 1991, n. 82",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:decreto.legislativo:1993-03-29;119,,"art. 3 del decreto legislativo 29 marzo 1993, n. 119",False
+l_136_2010,urn:nir:stato:legge:2010-08-13;136,urn:nir:stato:legge:2002-07-06;137,,"art. 10 della legge 6 luglio 2002, n. 137",False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.legislativo:2010;216,,"decreto legislativo n.
+216/2010",False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.legislativo:2002;220,,decreto legislativo n. 220/2002,False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.legislativo:1992;546,,decreto legislativo 546/1992,False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.del.presidente.della.repubblica:1998;392,,decreto del Presidente della Repubblica n. 392/1998,False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.del.presidente.della.repubblica:1998;38,,decreto del Presidente della Repubblica n. 38/1998,False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.del.presidente.della.repubblica:2008;197,,d.P.R. n. 197/2008,False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.del.presidente.della.repubblica:2002;115,,D.P.R. n.115/2002,False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:legge:1987;183,,legge n. 183/1987,False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:legge:1990;241,,legge n. 241/1990,False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:legge:2009;99,,"legge
+n. 99/2009",False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:legge:2007;244,,LEGGE N. 244/2007,False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:legge:2012-11-06;190,l_190_2012,"legge 6 novembre 2012, n. 190",True
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:legge:1990-08-07;241,l_241_1990,"legge 7 agosto 1990, n. 241",True
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.legislativo:2005-03-07;82,,"decreto legislativo 7 marzo 2005, n. 82",False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.legislativo:2009-10-27;150,,"decreto legislativo 27 ottobre 2009, n. 150",False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:legge:2009-03-04;15,,"legge 4 marzo 2009, n. 15",False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.legislativo:2003-06-30;196,,"decreto legislativo 30 giugno 2003, n. 196",False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.legge:2012-06-22;83,,"articolo 18 del decreto-legge 22 giugno 2012, n. 83",False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:legge:2012-08-07;134,,"legge 7 agosto 2012, n. 134",False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:decreto.legislativo:1997;281,,articolo 8 del decreto legislativo 281 del 1997,False
+dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:costituzione:1947-12-27,,"articolo 117, secondo comma, lettera m), della Costituzione",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:decreto.legislativo:2006;219,,decreto legislativo n. 219/2006,False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:costituzione:1947-12-27,,articoli 76,False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:legge:2015-08-07;124,,"articolo 7 della legge 7 agosto 2015, n. 124",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:legge:1990-08-07;241,l_241_1990,"legge 7 agosto 1990, n. 241",True
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:decreto.legislativo:2001-03-30;165,,"decreto legislativo 30 marzo 2001, n. 165",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:decreto.legislativo:2003-06-30;196,,"decreto legislativo 30 giugno 2003, n. 196",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:decreto.legislativo:2005-03-07;82,,"decreto legislativo 7 marzo 2005, n. 82",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:legge:2009-06-18;69,,"legge 18 giugno 2009, n. 69",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:decreto.legislativo:2009-10-27;150,,"decreto legislativo 27 ottobre 2009, n. 150",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:legge:2009-03-04;15,,"legge 4 marzo 2009, n. 15",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:decreto.legislativo:2010-07-02;104,,Codice del processo amministrativo,False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:legge:2012-11-06;190,l_190_2012,"legge 6 novembre 2012, n. 190",True
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:decreto.legislativo:2013-03-14;33,dlgs_33_2013,"decreto legislativo 14 marzo 2013, n. 33",True
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:decreto.legislativo:1997-08-28;281,,"articolo 8, del decreto legislativo 28 agosto 1997, n. 281",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:decreto.legislativo:2013;33,,decreto legislativo n. 33 del 2013,False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:presidente.repubblica:decreto:1985-12-28;1092,,"d.P.R. 28 dicembre 1985, n. 1092",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:legge:2007-08-03;124,,"articolo 31 della legge 3 agosto 2007, n. 124",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:legge:2007-12-24;244,,"articolo 2, comma 82, della legge 24 dicembre 2007, n. 244",False
+dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:presidente.repubblica:decreto:2002-05-30;115,,"decreto del Presidente della Repubblica 30 maggio 2002, n. 115",False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:decreto.legislativo:2010;61,,d.lgs. 61/2010,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:decreto.legislativo:2011;68,,d.lgs. 68/2011,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:decreto.legge:2012;59,,decreto-legge n. 59/2012,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:decreto.legge:2007;223,,DL 223/2007,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:1992;164,,"legge
+164/1992",False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:1999;526,,legge n. 526/1999,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:2012;59,,legge n. 59/2012,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:2012;100,,legge n. 100/2012,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:1992;225,,legge n. 225/1992,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:2012;16,,legge n. 16/2012,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:costituzione:1947-12-27,,articoli 76,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:2010-08-13;136,l_136_2010,articoli 1,True
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:decreto.legislativo:2011-09-06;159,,"decreto legislativo 6 settembre 2011, n. 159",False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:2010;136,,legge n. 136 del 2010,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:decreto.legislativo:2011;159,,decreto legislativo n. 159 del 2011,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:presidente.repubblica:decreto:1985-12-28;1092,,"D.P.R. 28 dicembre 1985, n. 1092",False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:1982-09-13;646,,"art. 23-bis della legge 13 settembre 1982, n. 646",False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:presidente.repubblica:codice.procedura.penale:1988-09-22;447,,codice di procedura penale,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:decreto.legislativo:1989-07-28;271,,"decreto legislativo 28 luglio 1989, n. 271",False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:decreto.legislativo:2004-01-22;42,,"art. 10, comma 3, del codice dei beni culturali e del paesaggio",False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:presidente.repubblica:decreto:1986-12-22;917,,"decreto del Presidente della Repubblica 22 dicembre 1986, n. 917",False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:2009-12-31;196,,"art. 17, comma 3, della legge 31 dicembre 2009, n. 196",False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:1965-05-31;575,,"legge 31 maggio 1965, n. 575, e di cui all' art. 4",False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:decreto.legislativo:1994-08-08;490,,"decreto legislativo 8 agosto 1994, n. 490",False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:1965;575,,art. 10 della legge n. 575 del 1965,False
+dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:decreto.legislativo:2000-08-18;267,,"decreto legislativo 18 agosto 2000, n. 267",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:decreto.legislativo:2007;206,,decreto legislativo n. 206/2007,False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:costituzione:1947-12-27,,articoli 76,False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:2009-12-31;196,,"legge 31 dicembre 2009, n. 196",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:2011-04-07;39,,"legge 7 aprile 2011, n. 39",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,"decreto legislativo 12 aprile 2006, n. 163",True
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:presidente.repubblica:decreto:2010-10-05;207,,"decreto del Presidente delle Repubblica 5 ottobre 2010, n. 207",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:1994-01-14;20,,"legge 14 gennaio 1994, n. 20",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:1997-05-15;127,,"legge 15 maggio 1997, n. 127",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:1999-05-17;144,,"legge 17 maggio 1999, n. 144",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:2001-12-21;443,,"legge 21 dicembre 2001, n. 443",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:2009-05-05;42,,"legge 5 maggio 2009, n. 42",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:2009-06-18;69,,"legge 18 giugno 2009, n. 69",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:decreto.legislativo:2011-05-31;88,,"decreto legislativo 31 maggio 2011, n. 88",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:presidente.repubblica:decreto:1985-12-28;1092,,"D.P.R. 28 dicembre 1985, n. 1092",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:2009;196,,legge n. 196 del 2009,False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:1994;20,,legge n. 20 del 1994,False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:1997;127,,legge n. 127 del 1997,False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:1999;144,,legge n. 144 del 1999,False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:decreto.legislativo:1998-03-31;112,,"articolo 6 del decreto legislativo 31 marzo 1998, n. 112",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:decreto.legislativo:1989-09-06;322,,"decreto legislativo 6 settembre 1989, n. 322",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:decreto.legge:1995-06-23;244,,"articolo 6 del decreto-legge 23 giugno 1995, n. 244",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:1995-08-08;341,,"legge 8 agosto 1995, n. 341",False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:2009;42,,legge n. 42 del 2009,False
+dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:legge:2009;69,,legge n. 69 del 2009,False
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:decreto.legislativo:2007;206,,decreto legislativo n. 206/2007,False
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:costituzione:1947-12-27,,articoli 76,False
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:legge:2009-05-05;42,,"articolo 22 della legge 5 maggio 2009, n. 42",False
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:legge:2009-12-31;196,,"legge 31 dicembre 2009, n. 196",False
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:legge:2003-01-16;3,,"articolo 11 della legge 16 gennaio 2003, n. 3",False
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:legge:1999-05-17;144,,"legge 17 maggio 1999, n. 144",False
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,"decreto legislativo 12 aprile 2006, n. 163",True
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:legge:2010-08-13;136,l_136_2010,"legge 13 agosto 2010, n. 136",True
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:decreto.legge:2010-11-12;187,,"decreto-legge del 12 novembre 2010, n. 187",False
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:legge:2010-12-17;217,,"legge 17 dicembre 2010, n. 217",False
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:decreto.legislativo:1997-12-05;430,,"articolo 3, comma 5, del decreto legislativo 5 dicembre 1997, n. 430",False
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:decreto.legislativo:2011-05-31;88,,"decreto legislativo 31 maggio 2011, n. 88",False
+dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:decreto.legislativo:2013-03-14;33,dlgs_33_2013,"articolo 2-bis del decreto legislativo 14 marzo 2013, n. 33",True
+dlgs_59_2010,urn:nir:stato:decreto.legislativo:2010-03-26;59,urn:nir:stato:costituzione:1947-12-27,,articoli 76,False
+dlgs_59_2010,urn:nir:stato:decreto.legislativo:2010-03-26;59,urn:nir:stato:legge:2009-07-07;88,,"legge 7 luglio 2009, n. 88",False
+dlgs_59_2010,urn:nir:stato:decreto.legislativo:2010-03-26;59,urn:nir:stato:legge:2017-12-27;205,,"L. 27 dicembre 2017, n. 205",False
+dlgs_59_2010,urn:nir:stato:decreto.legislativo:2010-03-26;59,urn:nir:stato:decreto.legislativo:2010;59,,decreto legislativo n. 59 del 2010,False
+dlgs_59_2010,urn:nir:stato:decreto.legislativo:2010-03-26;59,urn:nir:stato:legge:2000-10-24;323,,"articolo 3, comma 1, della legge 24 ottobre 2000, n. 323",False

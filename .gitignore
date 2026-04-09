@@ -1,6 +1,5 @@
 __pycache__/
 *.pyc
 .env
-ds_api.txt
 texts_checkpoint.csv
 nodes_texts.csv

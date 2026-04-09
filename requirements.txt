@@ -13,3 +13,4 @@ dash
 dash-cytoscape
 plotly
 python-dotenv
+pdfplumber

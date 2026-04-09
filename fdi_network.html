@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FDI Screening — EU Normative Network</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js">
+// ── Evidence text panel ──────────────────────────────────────────────────────
+const LCOL={L1:'#4f8ef7',L2:'#b090e0',L3:'#3a9c6e',L4:'#c87040'};
+
+function closeArtPanel(){document.getElementById('art-panel').style.display='none';}
+
+function highlightText(text,evidence){
+  if(!text)return'<span style="color:var(--text3);font-style:italic">Testo non disponibile</span>';
+  let s=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const evs=[...evidence].sort((a,b)=>(b.testo||'').length-(a.testo||'').length);
+  const parts=[];
+  for(const ev of evs){
+    const q=(ev.testo||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if(!q)continue;
+    const idx=s.indexOf(q);
+    if(idx===-1)continue;
+    // skip if overlaps existing part
+    if(parts.some(p=>idx<p.e&&idx+q.length>p.s))continue;
+    parts.push({s:idx,e:idx+q.length,q,layer:ev.layer,m:(ev.motivo||'').replace(/"/g,'&quot;')});
+  }
+  parts.sort((a,b)=>a.s-b.s);
+  let out='',pos=0;
+  for(const p of parts){
+    out+=s.slice(pos,p.s);
+    const c=LCOL[p.layer]||'#888';
+    out+=`<span class="ev-s ev-${p.layer}">${p.q}<span class="ev-tip"><strong style="color:${c}">${p.layer}</strong> — ${p.m}</span></span>`;
+    pos=p.e;
+  }
+  return out+s.slice(pos);
+}
+
+function openArtPanel(artId,text,evidence){
+  document.getElementById('ap-id').textContent='Art. '+artId;
+  document.getElementById('ap-body').innerHTML=highlightText(text,evidence||[]);
+  document.getElementById('art-panel').style.display='block';
+  const hasEv=(evidence||[]).length>0;
+  document.getElementById('ap-hint').style.display=hasEv?'':'none';
+}
+
+</script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14; --bg2:#131720; --bg3:#181c26;
+  --border:#202535; --border2:#2b3248;
+  --text:#c4cede; --text2:#6e7a95; --text3:#3d4560;
+  --accent:#4f8ef7; --accent2:#7aaeff;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  /* edge family colours */
+  --c-ref:#4a6fa8;
+  --c-hier:#7b52ab;
+  --c-mod:#c85c3a;
+  --c-proc:#3a9c6e;
+  --c-temp:#a89c3a;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+header{display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.h-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--accent);background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.22);padding:2px 8px;border-radius:2px;text-transform:uppercase}
+header h1{font-size:12.5px;font-weight:500;letter-spacing:.02em}
+.h-right{margin-left:auto;font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+.main{display:flex;flex:1;overflow:hidden}
+#gp{flex:1;min-width:0;position:relative;overflow:hidden}
+#gs{width:100%;height:100%}
+
+/* ── Nodes ── */
+.node circle{cursor:pointer;transition:stroke-width .12s,stroke .12s}
+.node:hover circle,.node.sel circle{stroke:#fff!important;stroke-width:2.5px;filter:drop-shadow(0 0 7px rgba(255,255,255,.35))}
+.node.sel circle{stroke-width:3px}
+.node text{font-family:var(--mono);font-size:8px;fill:var(--text3);pointer-events:none;user-select:none}
+.node:hover text,.node.sel text{fill:var(--text2)}
+
+/* ── Edges ── */
+.edge{fill:none;transition:opacity .15s, stroke-width .15s}
+.edge.ref  {stroke:var(--c-ref)}
+.edge.hier {stroke:var(--c-hier)}
+.edge.mod  {stroke:var(--c-mod)}
+.edge.proc {stroke:var(--c-proc)}
+.edge.temp {stroke:var(--c-temp)}
+/* default dim, brighten on hover/filter */
+.edge{opacity:.45}
+.edge.active{opacity:.95!important}
+.edge.dimmed{opacity:.08!important}
+
+/* Arrow markers — one per family colour */
+marker path{stroke:none}
+
+/* ── Tooltip ── */
+#tip{position:absolute;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;padding:9px 13px;font-size:11px;pointer-events:none;opacity:0;transition:opacity .1s;max-width:280px;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+.ti{font-family:var(--mono);font-size:10px;color:var(--accent2);margin-bottom:3px}
+.tt{font-size:11px;color:var(--text);margin-bottom:6px;line-height:1.4}
+.tr{display:flex;justify-content:space-between;gap:14px;font-size:9.5px;color:var(--text2);font-family:var(--mono);margin-bottom:2px}
+.tv{color:var(--text)}
+.tc{margin-top:5px;font-size:9.5px;color:var(--accent);font-family:var(--mono)}
+/* edge tooltip */
+.et-type{font-family:var(--mono);font-size:10px;font-weight:500;margin-bottom:3px}
+.et-nodes{font-size:10px;color:var(--text2);line-height:1.5}
+
+/* ── Detail panel ── */
+#dp{width:0;overflow:hidden;border-left:1px solid var(--border);background:var(--bg2);transition:width .32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;flex-shrink:0}
+#dp.open{width:min(900px,60vw)}
+#di{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden}
+
+.ph{padding:13px 18px 11px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ph1{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.pcx{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--accent2)}
+.ps{font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:2px}
+.ps.hi{background:rgba(200,64,64,.15);color:#e07070;border:1px solid rgba(200,64,64,.3)}
+.ps.mi{background:rgba(210,178,44,.1);color:#c9b840;border:1px solid rgba(210,178,44,.25)}
+.ps.lo{background:rgba(44,120,74,.12);color:#58b872;border:1px solid rgba(44,120,74,.3)}
+/* Lamfalussy badge */
+.lamf-badge{font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:2px;background:rgba(123,82,171,.15);color:#b090e0;border:1px solid rgba(123,82,171,.3)}
+.pbtn{margin-left:auto;cursor:pointer;color:var(--text3);background:none;border:1px solid var(--border);border-radius:3px;padding:2px 7px;font-size:14px;line-height:1;transition:color .12s}
+.pbtn:hover{color:var(--text);border-color:var(--border2)}
+.ptit{font-size:11.5px;color:var(--text2);line-height:1.45;margin-top:2px}
+.pmeta{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;font-size:10.5px;font-family:var(--mono);color:var(--text3)}
+.pmeta span{color:var(--text2)}
+
+/* Zoom toolbar */
+.hm-toolbar{display:flex;align-items:center;gap:10px;padding:6px 14px 6px 18px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
+.hm-toolbar-label{font-size:9px;font-family:var(--mono);letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-right:4px}
+.zoom-btn{cursor:pointer;background:none;border:1px solid var(--border);border-radius:3px;color:var(--text2);font-size:14px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;transition:color .1s,border-color .1s;font-family:var(--mono);flex-shrink:0}
+.zoom-btn:hover{color:var(--text);border-color:var(--border2);background:rgba(255,255,255,.04)}
+.zoom-val{font-family:var(--mono);font-size:10px;color:var(--text2);width:38px;text-align:center}
+.zoom-fit{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--accent);background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:2px;padding:2px 8px;cursor:pointer;margin-left:4px;transition:background .1s}
+.zoom-fit:hover{background:rgba(79,142,247,.15)}
+
+#pc{flex:1;overflow:auto;position:relative}
+#pc::-webkit-scrollbar{width:6px;height:6px}
+#pc::-webkit-scrollbar-track{background:var(--bg2)}
+#pc::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+#hm-scale-wrap{display:inline-block;transform-origin:top left;padding:16px}
+
+.hm-png-scroll{padding:16px;overflow:auto}
+.hm-png-scroll img{display:block;max-width:none;width:1200px;height:auto;border:1px solid var(--border);border-radius:4px}
+.hm-cap{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px;text-align:center}
+.hm-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;gap:12px;color:var(--text3)}
+.hm-ph .ico{font-size:30px;opacity:.35}
+.hm-ph p{font-size:11px;font-family:var(--mono);text-align:center;line-height:1.65}
+.hm-ph .pd{font-size:10.5px;background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.2);padding:3px 12px;border-radius:2px;color:var(--accent2);font-family:var(--mono)}
+.lgd{padding:7px 18px 9px;display:flex;align-items:center;gap:8px;font-size:10px;font-family:var(--mono);color:var(--text3);flex-shrink:0;border-top:1px solid var(--border)}
+#lc{width:100px;height:8px;border-radius:2px}
+
+/* ── Graph legends ── */
+#gl-hybrid{position:absolute;bottom:14px;left:14px;background:rgba(10,12,18,.9);border:1px solid var(--border);border-radius:4px;padding:10px 14px;font-size:10px;font-family:var(--mono);color:var(--text2);backdrop-filter:blur(10px)}
+#gl-edges{position:absolute;bottom:14px;left:180px;background:rgba(10,12,18,.9);border:1px solid var(--border);border-radius:4px;padding:10px 14px;font-size:10px;font-family:var(--mono);color:var(--text2);backdrop-filter:blur(10px)}
+.glti{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:7px}
+.glr{display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer;border-radius:3px;padding:1px 3px;transition:background .1s}
+.glr:hover{background:rgba(255,255,255,.05)}
+.glr.faded{opacity:.35}
+.gld{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.gl-edge-line{width:22px;height:3px;border-radius:2px;flex-shrink:0}
+.glcr{display:flex;align-items:flex-end;gap:5px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.glc{background:rgba(140,155,175,.2);border:1px solid rgba(140,155,175,.25);border-radius:50%;flex-shrink:0}
+.gl-edge-w{display:flex;align-items:center;gap:5px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);color:var(--text3);font-size:9px}
+.gl-w-line{background:rgba(150,160,180,.4);border-radius:2px;flex-shrink:0}
+
+#hint{position:absolute;top:13px;left:50%;transform:translateX(-50%);font-size:10px;font-family:var(--mono);color:var(--text3);background:rgba(10,12,18,.78);border:1px solid var(--border);padding:4px 14px;border-radius:20px;pointer-events:none;transition:opacity .5s;white-space:nowrap}
+#hint.gone{opacity:0}
+
+/* ── Evidence text panel ── */
+#art-panel{display:none;flex-shrink:0;border-top:1px solid var(--border);background:var(--bg3);max-height:38%;overflow-y:auto}
+.ap-hdr{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg3);z-index:1}
+.ap-id{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--accent2)}
+.ap-close{margin-left:auto;cursor:pointer;font-size:10px;color:var(--text3);font-family:var(--mono);padding:2px 6px;border:1px solid var(--border);border-radius:2px}
+.ap-close:hover{color:var(--text);border-color:var(--border2)}
+.ap-body{padding:12px 16px;font-family:var(--mono);font-size:10.5px;line-height:1.75;color:var(--text);white-space:pre-wrap;word-break:break-word}
+.ev-s{border-radius:2px;padding:0 2px;cursor:help;position:relative;display:inline}
+.ev-L1{background:rgba(79,142,247,.18);border-bottom:2px solid #4f8ef7}
+.ev-L2{background:rgba(176,144,224,.18);border-bottom:2px solid #b090e0}
+.ev-L3{background:rgba(58,156,110,.18);border-bottom:2px solid #3a9c6e}
+.ev-L4{background:rgba(200,112,64,.18);border-bottom:2px solid #c87040}
+.ev-tip{display:none;position:absolute;bottom:calc(100% + 5px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:7px 10px;font-size:9px;color:var(--text);width:230px;z-index:300;line-height:1.45;pointer-events:none;white-space:normal}
+.ev-s:hover .ev-tip{display:block}
+.hm-row-hl{cursor:pointer}
+.hm-row-hl:hover rect.row-bg{fill:rgba(255,255,255,.05)!important}
+/* ── Lamfalussy distribution bar ── */
+.lamf-bar{margin-top:8px;padding-top:7px;border-top:1px solid var(--border)}
+.lamf-bar-track{display:flex;height:6px;border-radius:3px;overflow:hidden;gap:1px;margin-bottom:5px;background:var(--bg3)}
+.lamf-seg{height:100%;transition:width .3s ease;min-width:0}
+.lamf-lbls{display:flex;gap:12px;font-family:var(--mono);font-size:9px;color:var(--text2)}
+.lamf-lbl-pct{color:var(--text);margin-left:1px}
+</style>
+</head>
+<body>
+<header>
+  <div class="h-tag">Prototype v0.5</div>
+  <h1>FDI Screening — EU Normative Network</h1>
+  <div class="h-right">19 acts · 13 emerged layers · 5 edge types</div>
+</header>
+<div class="main">
+  <div id="gp">
+    <svg id="gs"></svg>
+    <div id="tip"></div>
+
+    <!-- Node legend -->
+    <div id="gl-hybrid">
+      <div class="glti">Hybridity Score (H)</div>
+      <div class="glr"><div class="gld" style="background:#c84040"></div> High (&gt;0.25)</div>
+      <div class="glr"><div class="gld" style="background:#d4a030"></div> Medium (0.10–0.25)</div>
+      <div class="glr"><div class="gld" style="background:#4aa86a"></div> Low (&lt;0.10)</div>
+      <div class="glcr">
+        <div class="glc" style="width:7px;height:7px"></div>
+        <div class="glc" style="width:14px;height:14px"></div>
+        <div class="glc" style="width:23px;height:23px"></div>
+        <span style="margin-left:5px;font-size:8.5px;color:var(--text3)">∝ n articles</span>
+      </div>
+    </div>
+
+    <!-- Edge legend — clickable filter -->
+    <div id="gl-edges">
+      <div class="glti">Edge type <span style="color:var(--text3);font-size:8px">(click to filter)</span></div>
+      <div class="glr" data-family="ref"  onclick="toggleFamily('ref')">
+        <div class="gl-edge-line" style="background:var(--c-ref)"></div>
+        <span>CITES / RELATED_TO</span>
+      </div>
+      <div class="glr" data-family="hier" onclick="toggleFamily('hier')">
+        <div class="gl-edge-line" style="background:var(--c-hier)"></div>
+        <span>BASED_ON / IMPLEMENTS</span>
+      </div>
+      <div class="glr" data-family="mod"  onclick="toggleFamily('mod')">
+        <div class="gl-edge-line" style="background:var(--c-mod)"></div>
+        <span>AMENDS / REPEALS</span>
+      </div>
+      <div class="glr" data-family="proc" onclick="toggleFamily('proc')">
+        <div class="gl-edge-line" style="background:var(--c-proc)"></div>
+        <span>DEROGATES / EXTENDS</span>
+      </div>
+      <div class="gl-edge-w">
+        <div class="gl-w-line" style="width:20px;height:1.5px"></div>
+        <div class="gl-w-line" style="width:20px;height:2.5px"></div>
+        <div class="gl-w-line" style="width:20px;height:4px"></div>
+        <span style="margin-left:3px">weight ∝ strength</span>
+      </div>
+    </div>
+
+    <div id="hint">Hover edges for type · click nodes for heatmap · click legend to filter</div>
+  </div>
+
+  <div id="dp">
+    <div id="di">
+      <div class="ph">
+        <div class="ph1">
+          <span class="pcx" id="ph-cx">—</span>
+          <span class="ps" id="ph-sc">H = —</span>
+          <span class="lamf-badge" id="ph-lamf" style="display:none"></span>
+          <button class="pbtn" id="btn-cl">✕</button>
+        </div>
+        <div class="ptit" id="ph-ti">—</div>
+        <div class="pmeta">
+          <span>Articles: <span id="ph-n">—</span></span>
+          <span>Dom. layer: <span id="ph-dom">—</span></span>
+        </div>
+        <div class="lamf-bar" id="ph-lamf-bar" style="display:none">
+          <div class="lamf-bar-track">
+            <div class="lamf-seg" id="lbs-L1" style="background:#4f8ef7"></div>
+            <div class="lamf-seg" id="lbs-L2" style="background:#b090e0"></div>
+            <div class="lamf-seg" id="lbs-L3" style="background:#3a9c6e"></div>
+            <div class="lamf-seg" id="lbs-L4" style="background:#c87040"></div>
+          </div>
+          <div class="lamf-lbls">
+            <span style="color:#4f8ef7">L1<span class="lamf-lbl-pct" id="lpct-L1"> —</span></span>
+            <span style="color:#b090e0">L2<span class="lamf-lbl-pct" id="lpct-L2"> —</span></span>
+            <span style="color:#3a9c6e">L3<span class="lamf-lbl-pct" id="lpct-L3"> —</span></span>
+            <span style="color:#c87040">L4<span class="lamf-lbl-pct" id="lpct-L4"> —</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="hm-toolbar" id="hm-toolbar" style="display:none">
+        <span class="hm-toolbar-label">Zoom</span>
+        <button class="zoom-btn" id="z-out">−</button>
+        <span class="zoom-val" id="z-val">100%</span>
+        <button class="zoom-btn" id="z-in">+</button>
+        <button class="zoom-fit" id="z-fit">Fit</button>
+        <span style="margin-left:auto;font-size:9px;font-family:var(--mono);color:var(--text3)">Ctrl+scroll to zoom</span>
+      </div>
+      <div id="pc"></div>
+      <div class="lgd" id="lgd" style="display:none">
+        <canvas id="lc"></canvas>
+        <span>0%</span><span style="margin-left:auto">100%</span>
+        <span style="margin-left:8px;color:var(--text3)">content in layer</span>
+      </div>
+    </div>
+      <div id="art-panel">
+        <div class="ap-hdr">
+          <span class="ap-id" id="ap-id">—</span>
+          <span style="font-size:9px;color:var(--text3);font-family:var(--mono)" id="ap-hint">click a highlighted phrase for explanation</span>
+          <span class="ap-close" onclick="closeArtPanel()">✕ close</span>
+        </div>
+        <div class="ap-body" id="ap-body"></div>
+      </div>
+  </div>
+</div>
+
+<script>
+const NODES  = [{"id": "32005R0184", "H": 0.35, "n": 21, "dom": "Implementing & operational", "heatmap": "computed", "title": "Reg. (EC) No 184/2005 \u2014 Balance of Payments Statistics"}, {"id": "32016R1013", "H": 0.275, "n": 31, "dom": "Empowerment & delegation", "title": "Reg. (EU) 2016/1013 \u2014 Framework for FDI screening"}, {"id": "32010R1227", "H": 0.262, "n": 2, "dom": "Procedural trigger", "title": "Commission Reg. (EU) No 1227/2010 \u2014 Amending BoP"}, {"id": "32012R1219", "H": 0.258, "n": 54, "dom": "Procedural coordination", "title": "Reg. (EU) No 1219/2012 \u2014 Transitional bilateral investment treaties"}, {"id": "32023R1441", "H": 0.231, "n": 294, "dom": "Procedural filing", "title": "Commission Impl. Reg. (EU) 2023/1441 \u2014 FDI screening details"}, {"id": "32020D1502", "H": 0.204, "n": 40, "dom": "Procedural safeguards", "title": "Commission Decision (EU) 2020/1502 \u2014 Internal FDI rules"}, {"id": "32023R1472", "H": 0.201, "n": 2, "dom": "Procedural trigger", "title": "Commission Impl. Reg. (EU) 2023/1472 \u2014 Amending 2023/1441"}, {"id": "32019R0452", "H": 0.179, "n": 184, "dom": "Procedural coordination", "heatmap": "png", "title": "Reg. (EU) 2019/452 \u2014 FDI Screening Regulation \u2605"}, {"id": "32014R0228", "H": 0.175, "n": 2, "dom": "Implementing & operational", "title": "Commission Impl. Reg. (EU) No 228/2014"}, {"id": "32023R2414", "H": 0.16, "n": 2, "dom": "Implementing & operational", "title": "Commission Impl. Reg. (EU) 2023/2414 \u2014 Corrigendum"}, {"id": "32022R2560", "H": 0.159, "n": 1290, "dom": "Interpretative criteria", "title": "Reg. (EU) 2022/2560 \u2014 Foreign Subsidies Regulation"}, {"id": "32020R1298", "H": 0.157, "n": 4, "dom": "Cross-referential", "title": "Reg. (EU) 2020/1298 \u2014 COVID-19 temporary FDI measures"}, {"id": "32008R1055", "H": 0.079, "n": 3, "dom": "Procedural trigger", "title": "Council Reg. (EC) No 1055/2008 \u2014 Code of Practice (BoP)"}, {"id": "32007D0414", "H": 0.063, "n": 2, "dom": "Implementing & operational", "title": "Commission Decision 2007/0414 \u2014 Implementing procedures"}, {"id": "32024R3104", "H": 0.063, "n": 2, "dom": "Implementing & operational", "title": "Commission Impl. Reg. (EU) 2024/3104"}, {"id": "32020D0787", "H": 0.0, "n": 2, "dom": "Procedural default", "title": "Commission Decision (EU) 2020/0787 \u2014 Procedural rules"}, {"id": "32019R0505", "H": 0.0, "n": 2, "dom": "Implementing & operational", "title": "Commission Impl. Reg. (EU) 2019/0505"}, {"id": "32009R0707", "H": 0.0, "n": 2, "dom": "Implementing & operational", "title": "Commission Reg. (EC) No 707/2009"}, {"id": "32021R2126", "H": 0.0, "n": 2, "dom": "Implementing & operational", "title": "Commission Impl. Reg. (EU) 2021/2126"}];
+const EDGES  = [{"s": "32005R0184", "t": "32019R0452", "type": "CITES", "family": "ref", "w": 1}, {"s": "32005R0184", "t": "32022R2560", "type": "CITES", "family": "ref", "w": 1}, {"s": "32019R0452", "t": "32022R2560", "type": "CITES", "family": "ref", "w": 1}, {"s": "32016R1013", "t": "32010R1227", "type": "CITES", "family": "ref", "w": 1}, {"s": "32016R1013", "t": "32020D0787", "type": "CITES", "family": "ref", "w": 1}, {"s": "32023R1441", "t": "32019R0452", "type": "BASED_ON", "family": "hier", "w": 3}, {"s": "32023R1472", "t": "32019R0452", "type": "BASED_ON", "family": "hier", "w": 3}, {"s": "32020D1502", "t": "32019R0452", "type": "BASED_ON", "family": "hier", "w": 3}, {"s": "32007D0414", "t": "32019R0452", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "32019R0452", "t": "32016R1013", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "32005R0184", "t": "32008R1055", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "32010R1227", "t": "32005R0184", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "32023R1472", "t": "32023R1441", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "32016R1013", "t": "32012R1219", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "32014R0228", "t": "32019R0452", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "32023R2414", "t": "32023R1441", "type": "AMENDS", "family": "mod", "w": 1}, {"s": "32023R1441", "t": "32020D1502", "type": "IMPLEMENTS", "family": "proc", "w": 2}, {"s": "32019R0505", "t": "32012R1219", "type": "IMPLEMENTS", "family": "proc", "w": 2}, {"s": "32024R3104", "t": "32023R1441", "type": "IMPLEMENTS", "family": "proc", "w": 2}, {"s": "32005R0184", "t": "32012R1219", "type": "RELATED_TO", "family": "ref", "w": 1}, {"s": "32022R2560", "t": "32023R1441", "type": "RELATED_TO", "family": "ref", "w": 1}, {"s": "32022R2560", "t": "32016R1013", "type": "RELATED_TO", "family": "ref", "w": 1}, {"s": "32020R1298", "t": "32009R0707", "type": "RELATED_TO", "family": "ref", "w": 1}, {"s": "32020R1298", "t": "32021R2126", "type": "RELATED_TO", "family": "ref", "w": 1}];
+const HM184  = [{"id": "Art 10", "H": 0.677, "vals": [0, 15, 20, 25, 0, 0, 0, 0, 10, 0, 10, 0, 20]}, {"id": "Art 4p4", "H": 0.602, "vals": [0, 30, 10, 25, 15, 0, 0, 0, 20, 0, 0, 0, 0]}, {"id": "Art 7", "H": 0.602, "vals": [0, 0, 15, 30, 25, 0, 0, 0, 20, 0, 0, 0, 10]}, {"id": "Art 3", "H": 0.595, "vals": [0, 15, 0, 35, 20, 0, 20, 0, 0, 0, 10, 0, 0]}, {"id": "Art 11", "H": 0.593, "vals": [0, 0, 10, 20, 45, 5, 0, 0, 0, 0, 10, 0, 10]}, {"id": "Art 8p1", "H": 0.583, "vals": [0, 0, 0, 0, 10, 10, 0, 35, 0, 20, 0, 0, 25]}, {"id": "Art 4p2", "H": 0.583, "vals": [0, 35, 0, 0, 20, 0, 10, 0, 25, 0, 0, 0, 10]}, {"id": "Art 4p1", "H": 0.499, "vals": [0, 40, 0, 30, 10, 0, 0, 0, 20, 0, 0, 0, 0]}, {"id": "Art 5", "H": 0.476, "vals": [0, 0, 0, 20, 10, 0, 0, 0, 50, 0, 0, 0, 20]}, {"id": "Art 2", "H": 0.471, "vals": [0, 25, 0, 0, 10, 0, 0, 0, 50, 0, 15, 0, 0]}, {"id": "Art 4p6", "H": 0.409, "vals": [0, 0, 0, 0, 35, 0, 0, 0, 45, 0, 20, 0, 0]}, {"id": "Art 8p2", "H": 0.38, "vals": [0, 0, 0, 0, 15, 0, 55, 30, 0, 0, 0, 0, 0]}, {"id": "Art 12", "H": 0.262, "vals": [0, 40, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0]}, {"id": "Art 6", "H": 0.252, "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35, 0, 65]}, {"id": "Art 8p4", "H": 0.202, "vals": [0, 0, 0, 0, 10, 0, 5, 85, 0, 0, 0, 0, 0]}, {"id": "Art 9", "H": 0.165, "vals": [0, 0, 0, 85, 0, 0, 0, 0, 0, 0, 15, 0, 0]}, {"id": "Art 1", "H": 0.0, "vals": [0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"id": "Art 4p3", "H": 0.0, "vals": [0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0]}, {"id": "Art 4p5", "H": 0.0, "vals": [0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0]}, {"id": "Art 8p3", "H": 0.0, "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100]}, {"id": "Art 13", "H": 0.0, "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0]}];
+const L1     = ["Context", "Interpretative", "Empowerment", "Implementing", "Procedural", "Procedural", "Derogation", "Confidentiality", "Proc. trigger", "Proc. filing", "Temporal", "Default &", "Cross-ref."];
+const L2     = ["setting", "& criteria", "& delegation", "& operational", "coordination", "safeguards", "& exception", "& use limits", "& reporting", "& transmission", "& timing", "sanction", "operative"];
+
+// Edge family → colour (matches CSS vars)
+const FCOL = {
+  ref:  "#4a6fa8",
+  hier: "#7b52ab",
+  mod:  "#c85c3a",
+  proc: "#3a9c6e",
+  temp: "#a89c3a"
+};
+// Edge weight → stroke-width
+function ew(w){ return w===3 ? 3.2 : w===2 ? 2.0 : 1.1; }
+// Edge weight → opacity multiplier (heavier = more visible)
+function eo(w){ return w===3 ? .75 : w===2 ? .55 : .38; }
+
+function hcol(h){
+  if(h>=.25) return d3.interpolateRgb("#e05050","#b03030")(Math.min((h-.25)/.15,1));
+  if(h>=.1)  return d3.interpolateRgb("#4aa86a","#d4a030")((h-.1)/.15);
+  return d3.interpolateRgb("#287040","#4aa86a")(h/.1);
+}
+function nr(n){ return 4+Math.pow(n,.48)*1.1; }
+
+// ── SVG + Zoom ──────────────────────────────────────────────────────────────
+const svg = d3.select("#gs");
+const gp  = document.getElementById("gp");
+let W = gp.clientWidth, H = gp.clientHeight;
+svg.attr("viewBox",`0 0 ${W} ${H}`);
+const g = svg.append("g");
+svg.call(d3.zoom().scaleExtent([.2,6]).on("zoom", e=>g.attr("transform",e.transform)));
+
+// ── Arrow markers (one per family) ──────────────────────────────────────────
+const defs = svg.append("defs");
+Object.entries(FCOL).forEach(([fam, col])=>{
+  defs.append("marker")
+    .attr("id",`arrow-${fam}`)
+    .attr("viewBox","0 0 10 10")
+    .attr("refX",10).attr("refY",5)
+    .attr("markerWidth",6).attr("markerHeight",6)
+    .attr("orient","auto")
+    .append("path")
+    .attr("d","M0,0 L0,10 L10,5 z")
+    .attr("fill",col).attr("opacity",.7);
+});
+
+// ── Force sim ──────────────────────────────────────────────────────────────
+const links = EDGES.map(e=>({...e, source:e.s, target:e.t}));
+const lnk = g.append("g").selectAll("line").data(links).join("line")
+  .attr("class", d=>`edge ${d.family}`)
+  .attr("stroke-width", d=>ew(d.w))
+  .attr("opacity",      d=>eo(d.w))
+  .attr("marker-end",   d=>`url(#arrow-${d.family})`);
+
+const sim = d3.forceSimulation(NODES)
+  .force("link",      d3.forceLink(links).id(d=>d.id).distance(d=>95+nr(d.source.n||1)+nr(d.target.n||1)).strength(.5))
+  .force("charge",    d3.forceManyBody().strength(-380))
+  .force("center",    d3.forceCenter(W/2, H/2))
+  .force("collision", d3.forceCollide(d=>nr(d.n)+10));
+
+const ns = g.append("g").selectAll("g.node").data(NODES).join("g").attr("class","node")
+  .call(d3.drag()
+    .on("start",(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y})
+    .on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y})
+    .on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}));
+
+ns.append("circle")
+  .attr("r",d=>nr(d.n))
+  .attr("fill",d=>hcol(d.H)).attr("fill-opacity",.82)
+  .attr("stroke",d=>hcol(d.H)).attr("stroke-opacity",.45);
+ns.append("text").attr("dy",d=>nr(d.n)+9).attr("text-anchor","middle").text(d=>d.id.slice(-8));
+
+sim.on("tick",()=>{
+  // Shorten lines so arrowhead doesn't overlap the node circle
+  lnk.each(function(d){
+    if(!d.source.x) return;
+    const dx=d.target.x-d.source.x, dy=d.target.y-d.source.y;
+    const dist=Math.sqrt(dx*dx+dy*dy)||1;
+    const rSrc=nr(d.source.n||1)+2, rTgt=nr(d.target.n||1)+8;
+    d3.select(this)
+      .attr("x1", d.source.x + dx/dist*rSrc)
+      .attr("y1", d.source.y + dy/dist*rSrc)
+      .attr("x2", d.target.x - dx/dist*rTgt)
+      .attr("y2", d.target.y - dy/dist*rTgt);
+  });
+  ns.attr("transform",d=>`translate(${d.x},${d.y})`);
+});
+
+// ── Edge family filter ──────────────────────────────────────────────────────
+const activeF = new Set(["ref","hier","mod","proc","temp"]);
+function toggleFamily(fam){
+  if(activeF.has(fam)) activeF.delete(fam); else activeF.add(fam);
+  document.querySelectorAll(`#gl-edges .glr`).forEach(el=>{
+    el.classList.toggle("faded", !activeF.has(el.dataset.family));
+  });
+  lnk.classed("dimmed", d=>!activeF.has(d.family))
+     .classed("active",  false);
+}
+
+// ── Node + edge tooltips ────────────────────────────────────────────────────
+const tip = document.getElementById("tip");
+
+// Node hover
+ns.on("mouseover",(e,d)=>{
+  const sc=d.H>=.25?"#e07070":d.H>=.1?"#c9b840":"#58b872";
+  tip.innerHTML=
+    `<div class="ti">${d.id}</div><div class="tt">${d.title}</div>`+
+    `<div class="tr"><span>H (hybridity)</span><span class="tv" style="color:${sc}">${d.H.toFixed(3)}</span></div>`+
+    `<div class="tr"><span>Articles</span><span class="tv">${d.n}</span></div>`+
+    `<div class="tr"><span>Dom. layer</span><span class="tv">${d.dom}</span></div>`+
+    (d.heatmap?'<div class="tc">↗ Click for heatmap</div>':'');
+  tip.style.opacity="1";
+  // Highlight connected edges
+  lnk.classed("active", l=>l.source.id===d.id||l.target.id===d.id)
+     .classed("dimmed", l=>!(l.source.id===d.id||l.target.id===d.id));
+}).on("mousemove",e=>{
+  const r=gp.getBoundingClientRect();
+  let x=e.clientX-r.left+14,y=e.clientY-r.top-10;
+  if(x+290>W)x=e.clientX-r.left-304;
+  tip.style.left=x+"px";tip.style.top=y+"px";
+}).on("mouseleave",()=>{
+  tip.style.opacity="0";
+  lnk.classed("active",false).classed("dimmed",false);
+  lnk.style("opacity", d=>!activeF.has(d.family)?0.08:eo(d.w));
+});
+
+// Edge hover
+const FAMILY_LABEL={ref:"CITES / RELATED_TO",hier:"BASED_ON / IMPLEMENTS",mod:"AMENDS / REPEALS",proc:"DEROGATES / EXTENDS",temp:"TEMPORAL"};
+lnk.on("mouseover",(e,d)=>{
+  tip.innerHTML=
+    `<div class="et-type" style="color:${FCOL[d.family]}">${d.type}</div>`+
+    `<div class="et-nodes">${d.source.id || d.s}<br>→ ${d.target.id || d.t}</div>`;
+  tip.style.opacity="1";
+  lnk.classed("active",l=>l===d).classed("dimmed",l=>l!==d);
+}).on("mousemove",e=>{
+  const r=gp.getBoundingClientRect();
+  let x=e.clientX-r.left+10,y=e.clientY-r.top-10;
+  tip.style.left=x+"px";tip.style.top=y+"px";
+}).on("mouseleave",()=>{
+  tip.style.opacity="0";
+  lnk.classed("active",false).classed("dimmed",false);
+  lnk.style("opacity",d=>!activeF.has(d.family)?0.08:eo(d.w));
+});
+
+// ── Panel open/close ────────────────────────────────────────────────────────
+let selId=null;
+const dp=document.getElementById("dp");
+const hint=document.getElementById("hint");
+let hmScale=1.0;
+const SCALE_STEPS=[.3,.4,.5,.6,.7,.8,.9,1,1.2,1.5,2];
+let hmNW=0,hmNH=0;
+
+ns.on("click",(e,d)=>{
+  e.stopPropagation();
+  hint.classList.add("gone");
+  if(selId===d.id){closeP();return}
+  selId=d.id;
+  ns.classed("sel",n=>n.id===d.id);
+  openP(d);
+});
+svg.on("click",()=>closeP());
+document.getElementById("btn-cl").onclick=closeP;
+
+function closeP(){
+  selId=null;ns.classed("sel",false);dp.classList.remove("open");
+  document.getElementById("hm-toolbar").style.display="none";
+  document.getElementById("lgd").style.display="none";
+  document.getElementById("ph-lamf").style.display="none";
+}
+
+function applyScale(s){
+  hmScale=s;
+  document.getElementById("z-val").textContent=Math.round(s*100)+"%";
+  const wrap=document.getElementById("hm-scale-wrap");
+  if(!wrap)return;
+  wrap.style.transform=`scale(${s})`;
+  let sp=document.getElementById("hm-spacer");
+  if(!sp){sp=document.createElement("div");sp.id="hm-spacer";sp.style.cssText="position:absolute;top:0;left:0;pointer-events:none;opacity:0;";document.getElementById("pc").appendChild(sp)}
+  sp.style.width=(hmNW*s+32)+"px";sp.style.height=(hmNH*s+32)+"px";
+}
+function fitP(){
+  if(!hmNW||!hmNH)return;
+  const pc=document.getElementById("pc");
+  const s=Math.min((pc.clientWidth-32)/hmNW,(pc.clientHeight-32)/hmNH,1);
+  const sn=SCALE_STEPS.reduce((p,c)=>Math.abs(c-s)<Math.abs(p-s)?c:p);
+  applyScale(sn);
+}
+document.getElementById("z-in").onclick=()=>{const i=SCALE_STEPS.findIndex(s=>s>=hmScale);applyScale(SCALE_STEPS[Math.min(i+1,SCALE_STEPS.length-1)])};
+document.getElementById("z-out").onclick=()=>{const i=SCALE_STEPS.findIndex(s=>s>=hmScale);applyScale(SCALE_STEPS[Math.max(i-1,0)])};
+document.getElementById("z-fit").onclick=fitP;
+document.getElementById("pc").addEventListener("wheel",e=>{
+  if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();
+  const i=SCALE_STEPS.findIndex(s=>s>=hmScale);
+  if(e.deltaY<0&&i<SCALE_STEPS.length-1)applyScale(SCALE_STEPS[i+1]);
+  if(e.deltaY>0&&i>0)applyScale(SCALE_STEPS[i-1]);
+},{passive:false});
+
+function openP(d){
+  document.getElementById("ph-cx").textContent=d.id;
+  document.getElementById("ph-ti").textContent=d.title;
+  document.getElementById("ph-n").textContent=d.n+" articles";
+  document.getElementById("ph-dom").textContent=d.dom;
+  const sc=document.getElementById("ph-sc");
+  sc.textContent="ᴸH = "+d.H.toFixed(3);sc.title="Shannon entropy on Lamfalussy L1–4 (0=pure, 1=uniform)";
+  sc.className="ps "+(d.H>=.25?"hi":d.H>=.1?"mi":"lo");
+  // Lamfalussy badge — shown if available in data
+  const lb=document.getElementById("ph-lamf");
+  if(d.dominant_lamf){lb.textContent=d.dominant_lamf;lb.style.display="inline"}
+  else lb.style.display="none";
+
+  // Lamfalussy distribution bar
+  const lamfBar=document.getElementById('ph-lamf-bar');
+  if(d.lamf){
+    lamfBar.style.display='block';
+    ['L1','L2','L3','L4'].forEach(k=>{
+      const pct=d.lamf[k]||0;
+      document.getElementById('lbs-'+k).style.width=pct+'%';
+      document.getElementById('lpct-'+k).textContent=' '+Math.round(pct)+'%';
+    });
+  } else { lamfBar.style.display='none'; }
+
+  hmScale=1;document.getElementById("z-val").textContent="100%";
+  const pc=document.getElementById("pc");
+  const lgd=document.getElementById("lgd");
+  const tb=document.getElementById("hm-toolbar");
+
+  const arts=(typeof HEATMAPS!=='undefined')?HEATMAPS[d.id]:null;
+  closeArtPanel();
+  if(d.heatmap==="png"&&!arts){
+    lgd.style.display="none";tb.style.display="flex";
+    hmNW=1400;hmNH=860;
+    pc.style.position="relative";
+    pc.innerHTML=`<div id="hm-scale-wrap" style="transform-origin:top left;padding:16px;display:inline-block">
+      <img src="${IMG452}" style="display:block;width:${hmNW-32}px;height:auto;border:1px solid var(--border);border-radius:4px">
+      <div class="hm-cap">${d.id} · per-article normative layer distribution + Shannon entropy H</div>
+    </div>`;
+    setTimeout(fitP,350);
+  } else if(arts&&arts.length){
+    lgd.style.display="flex";tb.style.display="flex";
+    pc.style.position="relative";
+    const svgEl=buildHM(arts);
+    hmNW=+svgEl.getAttribute("width")+32;
+    hmNH=+svgEl.getAttribute("height")+32;
+    pc.innerHTML="";
+    const wrap=document.createElement("div");
+    wrap.id="hm-scale-wrap";wrap.style.cssText="transform-origin:top left;padding:16px;display:inline-block";
+    wrap.appendChild(svgEl);pc.appendChild(wrap);
+    drawLegend();setTimeout(fitP,350);
+  } else {
+    lgd.style.display="none";tb.style.display="none";
+    pc.innerHTML=`<div class="hm-ph"><div class="ico">⬡</div>`+
+      `<p>Full heatmap available after pipeline run.<br>Dominant layer:</p>`+
+      `<div class="pd">${d.dom}</div>`+
+      `<p style="margin-top:12px;font-size:9.5px;color:var(--text3)">Hᴸ = ${d.H.toFixed(3)} · ${d.n} articles analyzed</p></div>`;
+  }
+  dp.classList.add("open");
+}
+
+// ── SVG heatmap ─────────────────────────────────────────────────────────────
+function cblue(v){if(v===0)return"#0c1018";return d3.interpolateBlues(.12+(v/100)*.88)}
+function ecol(h){if(h<=0)return"#287040";if(h>=1)return"#c84040";return d3.interpolateRgb("#4aa86a","#c84040")(h)}
+
+function buildHM(arts){
+  const CW=50,CH=28,LW=64,EBW=40,ELW=30,EW=EBW+ELW+12,PT=110;
+  const nL=L1.length,nA=arts.length;
+  const W=LW+nL*CW+EW+4,H=PT+nA*CH+12;
+  const NS="http://www.w3.org/2000/svg";
+  const el=document.createElementNS(NS,"svg");
+  el.setAttribute("width",W);el.setAttribute("height",H);
+  el.style.cssText="font-family:var(--mono);display:block;background:var(--bg2)";
+  function mk(tag,attrs,txt){
+    const e=document.createElementNS(NS,tag);
+    for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);
+    if(txt!==undefined)e.textContent=txt;return e;
+  }
+  L1.forEach((la,j)=>{
+    const cx=LW+j*CW+CW/2;
+    el.appendChild(mk("text",{x:cx,y:PT-28,"font-size":"10",fill:"#8898c0","text-anchor":"middle"},la));
+    el.appendChild(mk("text",{x:cx,y:PT-14,"font-size":"10",fill:"#8898c0","text-anchor":"middle"},L2[j]));
+    el.appendChild(mk("line",{x1:cx-CW/2+1,y1:PT-5,x2:cx+CW/2-1,y2:PT-5,stroke:"#252a3a","stroke-width":"1"}));
+  });
+  const ehx=LW+nL*CW+EW/2;
+  el.appendChild(mk("text",{x:ehx,y:PT-28,"font-size":"10",fill:"#8898c0","text-anchor":"middle"},"Shannon"));
+  el.appendChild(mk("text",{x:ehx,y:PT-14,"font-size":"10",fill:"#8898c0","text-anchor":"middle"},"H entropy"));
+  arts.forEach((a,i)=>{
+    const y=PT+i*CH;
+    if(i%2===0)el.appendChild(mk("rect",{x:LW,y,width:nL*CW,height:CH,fill:"rgba(255,255,255,.018)"}));
+    const ov=mk('rect',{x:0,y,width:LW,height:CH,fill:'transparent',cursor:a.txt?'pointer':'default','data-i':i});
+    if(a.txt||a.ev&&a.ev.length){
+      ov.addEventListener('click',()=>openArtPanel(a.id,a.txt||'',a.ev||[]));
+      ov.addEventListener('mouseenter',()=>{ov.setAttribute('fill','rgba(255,255,255,.04)');});
+      ov.addEventListener('mouseleave',()=>{ov.setAttribute('fill','transparent');});
+    }
+    el.appendChild(ov);
+    el.appendChild(mk("text",{x:LW-5,y:y+CH*.68,"font-size":"11.5",
+      fill:a.H>.5?"#b0c4e8":a.H>.2?"#8899bb":"#5a6a8a",
+      "font-weight":a.H>.5?"500":"400","text-anchor":"end"},a.id));
+    a.vals.forEach((v,j)=>{
+      const x=LW+j*CW;
+      el.appendChild(mk("rect",{x,y,width:CW-1,height:CH-1,fill:cblue(v),rx:"1.5"}));
+      if(v>0){
+        const tf=v>50?"rgba(255,255,255,.95)":v>20?"rgba(200,218,250,.85)":"rgba(100,130,190,.75)";
+        el.appendChild(mk("text",{x:x+CW/2,y:y+CH*.68,"font-size":"10.5",fill:tf,"font-weight":v>50?"500":"400","text-anchor":"middle"},v+"%"));
+      }
+    });
+    const bx=LW+nL*CW+6,bw=Math.max(0,a.H*EBW);
+    el.appendChild(mk("rect",{x:bx,y:y+4,width:EBW,height:CH-9,fill:"#141820",rx:"2.5"}));
+    el.appendChild(mk("rect",{x:bx,y:y+4,width:bw,height:CH-9,fill:ecol(a.H),rx:"2.5",opacity:".88"}));
+    el.appendChild(mk("text",{x:bx+EBW+6,y:y+CH*.68,"font-size":"10.5",fill:ecol(a.H),"font-weight":"500","text-anchor":"start"},a.H<=0?"0.00":a.H.toFixed(2)));
+  });
+  for(let i=0;i<=nA;i++){const y=PT+i*CH;el.appendChild(mk("line",{x1:LW,y1:y,x2:LW+nL*CW,y2:y,stroke:"#1c2030","stroke-width":"1"}))}
+  for(let j=0;j<=nL;j++){const x=LW+j*CW;el.appendChild(mk("line",{x1:x,y1:PT,x2:x,y2:PT+nA*CH,stroke:"#1c2030","stroke-width":"1"}))}
+  return el;
+}
+function drawLegend(){
+  const c=document.getElementById("lc");c.width=100;c.height=8;
+  const ctx=c.getContext("2d"),grd=ctx.createLinearGradient(0,0,100,0);
+  for(let i=0;i<=10;i++)grd.addColorStop(i/10,d3.interpolateBlues(.12+(i/10)*.88));
+  ctx.fillStyle=grd;ctx.fillRect(0,0,100,8);
+}
+</script>
+</body>
+</html>
