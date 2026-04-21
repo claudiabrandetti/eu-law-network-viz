@@ -9,8 +9,5 @@ scipy
 umap-learn
 hdbscan
 openai
-dash
-dash-cytoscape
-plotly
 python-dotenv
-pdfplumber
+pymupdf
