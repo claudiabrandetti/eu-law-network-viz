@@ -1,0 +1,131 @@
+You are classifying provisions of EU legislation.
+
+Classification framework:
+
+Level 1:
+Level 1 sets out the core framework principles and defines the essential features of the legal regime. It includes, for example, the objectives of the act; its scope and key definitions; the main rights and obligations; the institutional framework; the allocation of roles and powers; and the core policy choices shaping the system. It may also include delegation clauses empowering other bodies to specify or implement certain aspects. These elements reflect fundamental normative choices and are intended to be stable and enduring.
+
+Level 2:
+Level 2 translates Level 1 principles into operational rules by specifying their detailed content and modes of application. It includes, for example, detailed procedural rules for applying obligations; specifications of conditions, thresholds, and calculation methodologies; technical requirements such as formats or reporting standards; and timelines or workflows for compliance. Level 2 is designed to make the framework actionable and may require periodic adaptation to technical or practical developments.
+
+Level 3:
+Level 3 consists of non-binding measures that aim to ensure consistent interpretation and application of the rules across different actors or jurisdictions. It includes, for example, guidelines, recommendations, opinions, Q&As, and other interpretative or practical guidance that clarify how provisions should be applied in practice. These measures do not create new binding obligations but support convergence and coherence in implementation.
+
+Level 4:
+Level 4 concerns the monitoring, supervision, and enforcement of compliance with the rules. It includes, for example, mechanisms for oversight, audits, inspections, or controls; enforcement actions and corrective measures; and procedures or responsibilities aimed at ensuring that obligations are effectively applied in practice. These elements focus on verifying compliance and addressing failures in implementation.
+
+Decision rules:
+
+Classify as level_1 if the provision primarily:
+- defines concepts, scope, or objectives
+- establishes general rights or obligations
+- sets institutional roles or powers
+- contains delegation clauses
+
+Classify as level_2 if the provision primarily:
+- specifies detailed procedures, conditions, or operational requirements for applying Level 1 rules
+- defines quantitative thresholds, benchmarks, or calculation methodologies
+- sets technical specifications, data formats, reporting requirements, or submission timelines
+- describes workflows, processes, or compliance mechanisms needed to implement obligations
+- focuses on performing or executing obligations, not on supervising or verifying them
+
+Classify as level_3 if the provision primarily:
+- issues guidelines, recommendations, opinions, or interpretative communications
+- provides practical clarification or examples on how rules should be applied
+- promotes consistent interpretation or convergence of practices across authorities or actors
+- offers non-binding guidance aimed at facilitating implementation
+
+Classify as level_4 if the provision primarily:
+- establishes monitoring, control, or supervisory mechanisms to ensure compliance
+- describes enforcement actions, corrective measures, or sanctions for non-compliance
+- provides for audits, inspections, or verification of the application of rules
+- assigns responsibilities for ensuring, overseeing, or enforcing compliance
+- focuses on checking, supervising, or evaluating whether obligations are complied with, rather than executing them
+
+Conflict resolution:
+- If elements from multiple levels are present, choose the dominant function.
+- If no dominant function can be identified, use "unassigned".
+
+Task:
+You are given one full EU legislative document for context, followed by a list of units (articles or commi) to classify.
+In the [UNITS TO CLASSIFY] section, each word in every unit is prefixed with its 1-based index: (1)word1 (2)word2 (3)word3 ...
+For each unit, you must:
+1. Read the full document to understand its purpose, structure, and context.
+2. Segment the unit into contiguous provisions. A provision is a self-contained normative statement or clause. Provisions must cover ALL tokens of the unit sequentially, with no gaps and no overlaps.
+3. Classify each provision as level_1, level_2, level_3, level_4, or unassigned.
+4. Return the start and end token indices (1-based, inclusive) of each provision.
+
+Unit rules:
+- The structure of the document is defined ONLY by the [ARTICLE X] and [COMMA X] tags.
+- If an article contains [COMMA X] tags, classify the provisions within each comma individually.
+- If an article is rendered with [ARTICLE_TEXT] instead of [COMMA X] tags, it has NO commi — segment and classify its text as a single unit with "comma_id" set to null. Do NOT split articles into sub-units based on numbered items in the text.
+
+Provision segmentation rules:
+- start and end are the 1-based token indices of the provision within the unit (inclusive).
+- The first provision must have start=1. The last provision must have end=N (where N is the total number of tokens in the unit).
+- Consecutive provisions must be contiguous: provision[i+1].start == provision[i].end + 1.
+- Do NOT leave any tokens unassigned.
+- A unit may have a single provision (start=1, end=N) if the entire text belongs to one category.
+- Split at natural clause or sentence boundaries. Do NOT split in the middle of a clause.
+
+Instructions:
+- Base the classification strictly on content.
+- Do not rely on position, numbering, and references to other articles.
+- Do not infer beyond what is explicitly stated.
+- Do not omit any unit.
+- Use the exact unit_id keys provided in the expected units list.
+- Each unit_id must appear exactly once in the output.
+- Do not invent new unit_id, article_id, or comma_id values.
+- Return only valid JSON.
+- Classify based on function, not on the formal source or legal instrument.
+- The reason must be concise (maximum 15 words) and describe the function of the provision.
+- Complete the task in a single response. Do not ask clarifying questions or request additional information. Proceed with the classification using your best judgment based on the content provided.
+
+[FULL DOCUMENT — read for context, do NOT classify]
+{{DOCUMENT_CONTEXT}}
+
+[UNITS TO CLASSIFY]
+{{CHUNK_TEXT}}
+
+Expected units:
+{{EXPECTED_UNITS}}
+
+Document:
+{{DOCUMENT_NAME}}
+
+Return exactly:
+{
+  "document_name": "{{DOCUMENT_NAME}}",
+  "classifications": {
+    "i000001": {
+      "article_id": "1",
+      "comma_id": "1",
+      "provisions": [
+        {
+          "start": 1,
+          "end": 18,
+          "label": "<<classification>>",
+          "reason": "<<reason>>"
+        },
+        {
+          "start": 19,
+          "end": 35,
+          "label": "<<classification>>",
+          "reason": "<<reason>>"
+        }
+      ]
+    },
+    "i000002": {
+      "article_id": "2",
+      "comma_id": null,
+      "provisions": [
+        {
+          "start": 1,
+          "end": 42,
+          "label": "<<classification>>",
+          "reason": "<<reason>>"
+        }
+      ]
+    }
+  }
+}

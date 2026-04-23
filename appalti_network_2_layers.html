@@ -6,7 +6,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
 // ── Evidence text panel ──────────────────────────────────────────────────────
-const LCOL={L1:'#4f8ef7',L2:'#b090e0'};
+const LCOL={L1:'#4f8ef7',L2:'#b090e0',L3:'#3a9c6e',L4:'#c85c3a'};
 
 // instructions:
 // python3 -m http.server 8080
@@ -21,7 +21,7 @@ function closeArtPanel(){
     const lamfBar=document.getElementById('ph-lamf-bar');
     if(d.lamf){
       lamfBar.style.display='block';
-      ['L1','L2'].forEach(k=>{
+      ['L1','L2','L3','L4'].forEach(k=>{
         document.getElementById('lbs-'+k).style.width=(d.lamf[k]||0)+'%';
         document.getElementById('lpct-'+k).textContent=' '+Math.round(d.lamf[k]||0)+'%';
       });
@@ -30,20 +30,30 @@ function closeArtPanel(){
 }
 
 function highlightText(text,evidence){
-  if(!text)return'<span style="color:var(--text3);font-style:italic">Testo non disponibile</span>';
+  const evs=[...evidence].sort((a,b)=>(b.testo||'').length-(a.testo||'').length);
+  if(!text){
+    if(evs.length){
+      return '<div style="color:var(--text3);font-size:9px;margin-bottom:8px;font-style:italic">Testo completo non disponibile — evidenze estratte:</div>\n'+
+        evs.map(ev=>{
+          const c=LCOL[ev.layer]||'#888';
+          const q=(ev.testo||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          const m=(ev.motivo||'').replace(/"/g,'&quot;');
+          return `<span class="ev-s ev-${ev.layer}">${q}<span class="ev-tip"><strong style="color:${c}">${ev.layer}</strong> — ${m}</span></span>`;
+        }).join('\n\n');
+    }
+    return '<span style="color:var(--text3);font-style:italic">Testo non disponibile</span>';
+  }
   let norm=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n')
                .replace(/([^\n])\n([^\n])/g,'$1 $2')
                .replace(/\n{3,}/g,'\n\n')
                .trim();
   let s=norm.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const evs=[...evidence].sort((a,b)=>(b.testo||'').length-(a.testo||'').length);
   const parts=[];
   for(const ev of evs){
     const q=(ev.testo||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     if(!q)continue;
     const idx=s.indexOf(q);
     if(idx===-1)continue;
-    // skip if overlaps existing part
     if(parts.some(p=>idx<p.e&&idx+q.length>p.s))continue;
     parts.push({s:idx,e:idx+q.length,q,layer:ev.layer,m:(ev.motivo||'').replace(/"/g,'&quot;')});
   }
@@ -63,13 +73,13 @@ function openArtPanel(artId,text,evidence,lamf){
   const lamfBar=document.getElementById('ph-lamf-bar');
   if(lamf && Object.keys(lamf).length){
     lamfBar.style.display='block';
-    ['L1','L2'].forEach(k=>{
+    ['L1','L2','L3','L4'].forEach(k=>{
       const pct=lamf[k]||0;
       document.getElementById('lbs-'+k).style.width=pct+'%';
       document.getElementById('lpct-'+k).textContent=' '+Math.round(pct)+'%';
     });
   }
-  document.getElementById('ap-id').textContent='Art. '+artId;
+  document.getElementById('ap-id').textContent='Art. '+String(artId).replace(/^[a-zA-Z_]+/,'');
   document.getElementById('ap-body').innerHTML=highlightText(text,evidence||[]);
   document.getElementById('art-panel').style.display='block';
   const hasEv=(evidence||[]).length>0;
@@ -109,8 +119,8 @@ header h1{font-size:12.5px;font-weight:500;letter-spacing:.02em}
 .node circle{cursor:pointer;transition:stroke-width .12s,stroke .12s}
 .node:hover circle,.node.sel circle{stroke:#fff!important;stroke-width:2.5px;filter:drop-shadow(0 0 7px rgba(255,255,255,.35))}
 .node.sel circle{stroke-width:3px}
-.node text{font-family:var(--mono);font-size:8px;fill:var(--text3);pointer-events:none;user-select:none}
-.node:hover text,.node.sel text{fill:var(--text2)}
+.node text{font-family:var(--mono);font-size:8px;fill:var(--text2);pointer-events:none;user-select:none;text-shadow:0 0 4px #0d0f14,0 0 4px #0d0f14,0 0 6px #0d0f14}
+.node:hover text,.node.sel text{fill:#fff;text-shadow:0 0 5px #0d0f14,0 0 8px #0d0f14}
 
 /* ── Edges ── */
 .edge{fill:none;transition:opacity .15s, stroke-width .15s}
@@ -120,9 +130,9 @@ header h1{font-size:12.5px;font-weight:500;letter-spacing:.02em}
 .edge.proc {stroke:var(--c-proc)}
 .edge.temp {stroke:var(--c-temp)}
 /* default dim, brighten on hover/filter */
-.edge{opacity:.45}
-.edge.active{opacity:.95!important}
-.edge.dimmed{opacity:.08!important}
+.edge{opacity:.12}
+.edge.active{opacity:.9!important}
+.edge.dimmed{opacity:.03!important}
 .edge.recep{stroke:var(--c-recep);stroke-width:2px}
 
 /* Arrow markers — one per family colour */
@@ -208,6 +218,8 @@ marker path{stroke:none}
 .ev-s{border-radius:2px;padding:0 2px;cursor:help;position:relative;display:inline}
 .ev-L1{background:rgba(79,142,247,.18);border-bottom:2px solid #4f8ef7}
 .ev-L2{background:rgba(176,144,224,.18);border-bottom:2px solid #b090e0}
+.ev-L3{background:rgba(58,156,110,.18);border-bottom:2px solid #3a9c6e}
+.ev-L4{background:rgba(200,92,58,.18);border-bottom:2px solid #c85c3a}
 .ev-tip{display:none;position:absolute;bottom:calc(100% + 5px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:7px 10px;font-size:9px;color:var(--text);width:230px;z-index:300;line-height:1.45;pointer-events:none;white-space:normal}
 .ev-s:hover .ev-tip{display:block}
 .hm-row-hl{cursor:pointer}
@@ -224,7 +236,7 @@ marker path{stroke:none}
 <header>
   <div class="h-tag">Prototype v0.5</div>
   <h1>Appalti Pubblici — Rete Normativa IT+EU</h1>
-  <div class="h-right">21 atti (17 IT + 4 EU) · 4 layer emersi · 5 tipi di arco</div>
+  <div class="h-right" id="h-count">21 atti · 4 livelli Lamfalussy · 5 tipi di arco</div>
 </header>
 <div class="main">
   <div id="gp">
@@ -302,10 +314,14 @@ marker path{stroke:none}
           <div class="lamf-bar-track">
             <div class="lamf-seg" id="lbs-L1" style="background:#4f8ef7"></div>
             <div class="lamf-seg" id="lbs-L2" style="background:#b090e0"></div>
+            <div class="lamf-seg" id="lbs-L3" style="background:#3a9c6e"></div>
+            <div class="lamf-seg" id="lbs-L4" style="background:#c85c3a"></div>
           </div>
           <div class="lamf-lbls">
             <span style="color:#4f8ef7">L1<span class="lamf-lbl-pct" id="lpct-L1"> —</span></span>
             <span style="color:#b090e0">L2<span class="lamf-lbl-pct" id="lpct-L2"> —</span></span>
+            <span style="color:#3a9c6e">L3<span class="lamf-lbl-pct" id="lpct-L3"> —</span></span>
+            <span style="color:#c85c3a">L4<span class="lamf-lbl-pct" id="lpct-L4"> —</span></span>
           </div>
         </div>
         <div class="lamf-bar" id="ph-layers-bar" style="display:none">
@@ -340,8 +356,119 @@ marker path{stroke:none}
 </div>
 
 <script>
-const NODES  = [{"id": "l_114_2014", "H": 0.79, "n": 24, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "L. 114/2014 — Conv. DL 90 · Riforma PA", "heatmap": "computed", "lamf": {"L1": 44.1, "L2": 55.9}}, {"id": "l_55_2019", "H": 0.799, "n": 21, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "L. 55/2019 — Conv. DL 32 · Sblocca cantieri", "heatmap": "computed", "lamf": {"L1": 44.4, "L2": 55.6}}, {"id": "dlgs_218_2012", "H": 0.684, "n": 7, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "D.Lgs. 218/2012 — Codice antimafia (correttivo)", "heatmap": "computed", "lamf": {"L1": 59.0, "L2": 41.0}}, {"id": "l_120_2020", "H": 0.794, "n": 38, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "L. 120/2020 — Conv. DL 76 · Semplificazioni", "heatmap": "computed", "lamf": {"L1": 50.5, "L2": 49.5}}, {"id": "l_108_2021", "H": 0.779, "n": 45, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "L. 108/2021 — Conv. DL 77 · PNRR", "heatmap": "computed", "lamf": {"L1": 43.2, "L2": 56.8}}, {"id": "dlgs_36_2023", "H": 0.778, "n": 229, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "D.Lgs. 36/2023 — Codice dei contratti pubblici", "heatmap": "computed", "lamf": {"L1": 38.0, "L2": 62.0}}, {"id": "dlgs_163_2006", "H": 0.774, "n": 72, "dom": "Operational implementation provisions", "dominant_lamf": "L3", "title": "D.Lgs. 163/2006 — Codice contratti pubblici (abrogato)", "heatmap": "computed", "lamf": {"L1": 42.4, "L2": 57.6}}, {"id": "dlgs_228_2011", "H": 0.739, "n": 7, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "D.Lgs. 228/2011 — Valutazione investimenti opere pubbliche", "heatmap": "computed", "lamf": {"L1": 28.3, "L2": 71.7}}, {"id": "l_90_2024", "H": 0.753, "n": 21, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "L. 90/2024 — Legge annuale concorrenza", "heatmap": "computed", "lamf": {"L1": 36.1, "L2": 63.9}}, {"id": "dlgs_229_2011", "H": 0.754, "n": 7, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "D.Lgs. 229/2011 — Monitoraggio opere pubbliche", "heatmap": "computed", "lamf": {"L1": 27.9, "L2": 72.1}}, {"id": "l_190_2012", "H": 0.604, "n": 50, "dom": "Foundational principles and interpretive clauses", "dominant_lamf": "L2", "title": "L. 190/2012 — Disposizioni anticorruzione", "heatmap": "computed", "lamf": {"L1": 33.5, "L2": 66.5}}, {"id": "dlgs_33_2013", "H": 0.706, "n": 40, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "D.Lgs. 33/2013 — Trasparenza PA", "heatmap": "computed", "lamf": {"L1": 30.4, "L2": 69.6}}, {"id": "dlgs_56_2017", "H": 0.626, "n": 38, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "D.Lgs. 56/2017 — Correttivo D.Lgs. 50/2016", "heatmap": "computed", "lamf": {"L1": 32.5, "L2": 67.5}}, {"id": "l_78_2022", "H": 0.63, "n": 22, "dom": "Foundational principles and interpretive clauses", "dominant_lamf": "L1", "title": "L. 78/2022 — Delega riforma appalti", "heatmap": "computed", "lamf": {"L1": 83.3, "L2": 16.7}}, {"id": "l_11_2016", "H": 0.654, "n": 27, "dom": "Foundational principles and interpretive clauses", "dominant_lamf": "L1", "title": "L. 11/2016 — Delega recepimento dir. 2014/23-24-25", "heatmap": "computed", "lamf": {"L1": 47.1, "L2": 52.9}}, {"id": "dlgs_97_2016", "H": 0.717, "n": 33, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "D.Lgs. 97/2016 — Riforma PA / FOIA", "heatmap": "computed", "lamf": {"L1": 49.6, "L2": 50.4}}, {"id": "l_136_2010", "H": 0.722, "n": 22, "dom": "Operational implementation provisions", "dominant_lamf": "L4", "title": "L. 136/2010 — Tracciabilità flussi finanziari", "heatmap": "computed", "lamf": {"L1": 50.0, "L2": 50.0}}, {"id": "32014L0024", "H": 0.739, "n": 94, "dom": "Foundational principles and interpretive clauses", "dominant_lamf": "L1", "title": "Dir. 2014/24/EU — Appalti pubblici nei settori ordinari", "eu": true, "heatmap": "computed", "lamf": {"L1": 39.8, "L2": 60.2}}, {"id": "32014L0023", "H": 0.7, "n": 56, "dom": "Foundational principles and interpretive clauses", "dominant_lamf": "L1", "title": "Dir. 2014/23/EU — Aggiudicazione contratti di concessione", "eu": true, "heatmap": "computed", "lamf": {"L1": 50.9, "L2": 49.1}}, {"id": "32014L0025", "H": 0.729, "n": 111, "dom": "Foundational principles and interpretive clauses", "dominant_lamf": "L1", "title": "Dir. 2014/25/EU — Appalti nei settori speciali", "eu": true, "heatmap": "computed", "lamf": {"L1": 45.7, "L2": 54.3}}];
-const EDGES  = [{"s": "dlgs_218_2012", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_56_2017", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_228_2011", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 1}, {"s": "dlgs_97_2016", "t": "l_190_2012", "type": "AMENDS", "family": "mod", "w": 1}, {"s": "l_114_2014", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "l_55_2019", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 1}, {"s": "l_120_2020", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 1}, {"s": "l_108_2021", "t": "dlgs_36_2023", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "l_11_2016", "t": "dlgs_36_2023", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "l_78_2022", "t": "dlgs_36_2023", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_36_2023", "t": "dlgs_163_2006", "type": "IMPLEMENTS", "family": "proc", "w": 1}, {"s": "l_190_2012", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_33_2013", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 2}, {"s": "l_136_2010", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_90_2024", "t": "dlgs_36_2023", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_55_2019", "t": "dlgs_36_2023", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_120_2020", "t": "dlgs_36_2023", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_108_2021", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_228_2011", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_97_2016", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_114_2014", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_218_2012", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_56_2017", "t": "dlgs_33_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_11_2016", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_78_2022", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dlgs_33_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_136_2010", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_90_2024", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_120_2020", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_108_2021", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_229_2011", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_229_2011", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "32014L0024", "t": "dlgs_36_2023", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0023", "t": "dlgs_36_2023", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0025", "t": "dlgs_36_2023", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}];
+const NODES  = [{"id": "l_108_2021", "H": 0.613, "n": 1, "dom": "Level 4 — Enforcement", "dominant_lamf": "L4", "title": "l_108_2021", "heatmap": "computed", "lamf": {"L1": 31.6, "L2": 7.0, "L3": 0.0, "L4": 61.4}}, {"id": "l_190_2012", "H": 0.607, "n": 2, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_190_2012", "heatmap": "computed", "lamf": {"L1": 36.8, "L2": 53.0, "L3": 0.0, "L4": 10.2}}, {"id": "dl_135_2018", "H": 0.331, "n": 12, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dl_135_2018", "heatmap": "computed", "lamf": {"L1": 35.7, "L2": 64.3, "L3": 0.0, "L4": 0.0}}, {"id": "l_241_1990", "H": 0.26, "n": 31, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_241_1990", "heatmap": "computed", "lamf": {"L1": 54.6, "L2": 38.5, "L3": 0.1, "L4": 6.9}}, {"id": "dlgs_228_2011", "H": 0.252, "n": 11, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_228_2011", "heatmap": "computed", "lamf": {"L1": 46.4, "L2": 41.5, "L3": 0.0, "L4": 12.1}}, {"id": "dlgs_33_2013", "H": 0.24, "n": 53, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_33_2013", "heatmap": "computed", "lamf": {"L1": 36.1, "L2": 53.3, "L3": 0.3, "L4": 10.3}}, {"id": "dlgs_36_2023", "H": 0.219, "n": 229, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_36_2023", "heatmap": "computed", "lamf": {"L1": 28.7, "L2": 64.2, "L3": 0.1, "L4": 7.0}}, {"id": "dl_13_2023", "H": 0.214, "n": 58, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dl_13_2023", "heatmap": "computed", "lamf": {"L1": 29.2, "L2": 66.6, "L3": 0.0, "L4": 4.1}}, {"id": "l_145_2018", "H": 0.184, "n": 19, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "l_145_2018", "heatmap": "computed", "lamf": {"L1": 46.7, "L2": 49.2, "L3": 0.0, "L4": 4.1}}, {"id": "l_90_2024", "H": 0.172, "n": 24, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "l_90_2024", "heatmap": "computed", "lamf": {"L1": 37.7, "L2": 47.5, "L3": 0.0, "L4": 14.8}}, {"id": "dlgs_59_2010", "H": 0.169, "n": 86, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_59_2010", "heatmap": "computed", "lamf": {"L1": 44.5, "L2": 42.0, "L3": 0.9, "L4": 12.6}}, {"id": "dlgs_97_2016", "H": 0.118, "n": 44, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_97_2016", "heatmap": "computed", "lamf": {"L1": 28.1, "L2": 67.0, "L3": 0.0, "L4": 4.9}}, {"id": "dlgs_229_2011", "H": 0.11, "n": 12, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_229_2011", "heatmap": "computed", "lamf": {"L1": 19.3, "L2": 69.9, "L3": 8.3, "L4": 2.4}}, {"id": "dlgs_209_2024", "H": 0.103, "n": 97, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_209_2024", "heatmap": "computed", "lamf": {"L1": 24.7, "L2": 72.0, "L3": 0.0, "L4": 3.3}}, {"id": "l_136_2010", "H": 0.091, "n": 16, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "l_136_2010", "heatmap": "computed", "lamf": {"L1": 33.5, "L2": 59.8, "L3": 0.0, "L4": 6.7}}, {"id": "dlgs_56_2017", "H": 0.081, "n": 131, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_56_2017", "heatmap": "computed", "lamf": {"L1": 7.9, "L2": 88.3, "L3": 0.3, "L4": 3.5}}, {"id": "dlgs_218_2012", "H": 0.071, "n": 10, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_218_2012", "heatmap": "computed", "lamf": {"L1": 30.9, "L2": 64.2, "L3": 0.0, "L4": 4.9}}, {"id": "dpr_207_2010", "H": 0.058, "n": 334, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dpr_207_2010", "heatmap": "computed", "lamf": {"L1": 70.2, "L2": 20.4, "L3": 2.1, "L4": 7.3}}, {"id": "dlgs_50_2016", "H": 0.047, "n": 220, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dlgs_50_2016", "heatmap": "computed", "lamf": {"L1": 95.4, "L2": 4.1, "L3": 0.0, "L4": 0.4}}, {"id": "dlgs_163_2006", "H": 0.007, "n": 174, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dlgs_163_2006", "heatmap": "computed", "lamf": {"L1": 75.5, "L2": 0.4, "L3": 23.7, "L4": 0.5}}, {"id": "dm_154_2017", "H": 0.0, "n": 14, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dm_154_2017", "heatmap": "computed", "lamf": {"L1": 85.7, "L2": 0.0, "L3": 14.3, "L4": 0.0}}, {"id": "l_120_2020", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_120_2020", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_11_2016", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_11_2016", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_114_2014", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_114_2014", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_105_2025", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_105_2025", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_55_2019", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_55_2019", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_56_2024", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_56_2024", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_78_2022", "H": 0.0, "n": 2, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_78_2022", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_98_2013", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_98_2013", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "32014L0024", "H": 0.637, "n": 94, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "DIRETTIVA 2014/24/UE DEL PARLAMENTO EUROPEO E DEL CONSIGLIO del 26 febbraio 2014 sugli appalti pubblici e che abroga la ", "heatmap": "computed", "lamf": {"L1": 31.6, "L2": 60.3, "L3": 0.3, "L4": 7.8}, "eu": true}, {"id": "32014L0025", "H": 0.612, "n": 110, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "DIRETTIVA 2014/25/UE DEL PARLAMENTO EUROPEO E DEL CONSIGLIO del 26 febbraio 2014 sulle procedure d’appalto degli enti er", "heatmap": "computed", "lamf": {"L1": 34.7, "L2": 59.6, "L3": 0.2, "L4": 5.6}, "eu": true}, {"id": "32014L0023", "H": 0.666, "n": 55, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "DIRETTIVA 2014/23/UE DEL PARLAMENTO EUROPEO E DEL CONSIGLIO del 26 febbraio 2014 sull’aggiudicazione dei contratti di co", "heatmap": "computed", "lamf": {"L1": 42.3, "L2": 50.0, "L3": 0.3, "L4": 7.4}, "eu": true}];
+const EDGES  = [{"s": "dlgs_36_2023", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dlgs_33_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "l_136_2010", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "l_114_2014", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dl_135_2018", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_36_2023", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dlgs_50_2016", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "l_78_2022", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "l_55_2019", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_36_2023", "t": "dlgs_228_2011", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "l_120_2020", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_36_2023", "t": "dlgs_229_2011", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_36_2023", "t": "l_108_2021", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dl_13_2023", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dpr_207_2010", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_209_2024", "t": "dlgs_36_2023", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_209_2024", "t": "l_241_1990", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_209_2024", "t": "dl_135_2018", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_209_2024", "t": "dlgs_50_2016", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_209_2024", "t": "dlgs_33_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_209_2024", "t": "l_120_2020", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_209_2024", "t": "l_136_2010", "type": "DEROGATES", "family": "proc", "w": 1}, {"s": "dlgs_56_2017", "t": "dlgs_50_2016", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_56_2017", "t": "l_11_2016", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_56_2017", "t": "dlgs_33_2013", "type": "REPEALS", "family": "mod", "w": 2}, {"s": "dlgs_56_2017", "t": "dlgs_229_2011", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_56_2017", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_56_2017", "t": "l_241_1990", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_56_2017", "t": "l_114_2014", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_56_2017", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_56_2017", "t": "l_98_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_11_2016", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dpr_207_2010", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_190_2012", "t": "l_241_1990", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "l_90_2024", "t": "dlgs_36_2023", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_136_2010", "t": "dlgs_163_2006", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_33_2013", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_33_2013", "t": "dlgs_229_2011", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_33_2013", "t": "dlgs_228_2011", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_33_2013", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_97_2016", "t": "dlgs_33_2013", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_97_2016", "t": "l_241_1990", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_97_2016", "t": "l_190_2012", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_97_2016", "t": "dlgs_50_2016", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_97_2016", "t": "dlgs_229_2011", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_97_2016", "t": "dlgs_228_2011", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_218_2012", "t": "l_136_2010", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_218_2012", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_228_2011", "t": "dlgs_163_2006", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_228_2011", "t": "dpr_207_2010", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_229_2011", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_229_2011", "t": "l_136_2010", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_59_2010", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_59_2010", "t": "dlgs_163_2006", "type": "DEROGATES", "family": "proc", "w": 1}, {"s": "dl_13_2023", "t": "l_108_2021", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_13_2023", "t": "l_55_2019", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dl_13_2023", "t": "dlgs_33_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_13_2023", "t": "l_145_2018", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_13_2023", "t": "dlgs_50_2016", "type": "DEROGATES", "family": "proc", "w": 1}, {"s": "dl_13_2023", "t": "l_241_1990", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dl_13_2023", "t": "l_120_2020", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_13_2023", "t": "dlgs_36_2023", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "l_145_2018", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_135_2018", "t": "l_145_2018", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dl_135_2018", "t": "dlgs_50_2016", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_209_2024", "t": "l_78_2022", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_209_2024", "t": "dlgs_36_2023", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_209_2024", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_11_2016", "t": "dlgs_228_2011", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_190_2012", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_190_2012", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_97_2016", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_97_2016", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_97_2016", "t": "dlgs_33_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_228_2011", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_229_2011", "t": "l_136_2010", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_135_2018", "t": "l_145_2018", "type": "CITES", "family": "ref", "w": 1}, {"s": "32014L0023", "t": "dlgs_36_2023", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0024", "t": "dlgs_36_2023", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0025", "t": "dlgs_36_2023", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0023", "t": "dlgs_50_2016", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0024", "t": "dlgs_50_2016", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0025", "t": "dlgs_50_2016", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "dlgs_218_2012", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_56_2017", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "l_114_2014", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "l_55_2019", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 1}, {"s": "l_120_2020", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 1}, {"s": "dlgs_36_2023", "t": "dlgs_163_2006", "type": "IMPLEMENTS", "family": "proc", "w": 1}, {"s": "l_108_2021", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_97_2016", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_114_2014", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_218_2012", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_78_2022", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_90_2024", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_120_2020", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_108_2021", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dm_154_2017", "t": "dlgs_50_2016", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_36_2023", "t": "dm_154_2017", "type": "REPEALS", "family": "mod", "w": 2}];
+// ── Aggiorna dom di ogni nodo dai dati reali della heatmap ──────────────────
+// dom statico in NODES è residuo del run precedente; questo lo sovrascrive
+// non appena heatmaps.json è caricato, usando i 4 layer emersi correnti.
+window.__onHeatmapsLoaded = function(data) {
+  const KEYS = ['L1','L2','L3','L4'];
+  const eps = 1e-9;
+
+  NODES.forEach(n => {
+    const arts = data[n.id];
+    if (!arts || !arts.length) return;
+
+    // 1. Distribuzione Lamfalussy live (media per layer)
+    const totals = KEYS.map(k =>
+      arts.reduce((s, a) => s + (a.lamf ? (+a.lamf[k]||0) : 0), 0) / arts.length
+    );
+    n.lamf = Object.fromEntries(KEYS.map((k, i) => [k, totals[i]]));
+
+    // 2. Dominant layer
+    const domIdx = totals.indexOf(Math.max(...totals));
+    n.dominant_lamf = KEYS[domIdx];
+    n.dom = (L1[domIdx] + ' ' + L2[domIdx]).trim();
+
+    // 3. H live: media delle entropie per articolo (= hybridity_score Python)
+    // 3. H = H(distribuzione media) — stessa formula di AGGR nella heatmap
+    const pSum_n = totals.reduce((a,b)=>a+b,0)||1;
+    const pNorm_n = totals.map(v=>v/pSum_n);
+    n.H = -pNorm_n.reduce((acc,p)=>acc+p*Math.log2(p+eps),0)/Math.log2(Math.max(totals.length,2));
+    if (!isFinite(n.H) || n.H < 0) n.H = 0;
+
+    // 4. Numero articoli reale
+    n.n = arts.length;
+
+    });
+
+  // Aggiorna conteggio header — DOPO aver aggiunto tutti i nodi nuovi
+
+  // 5. Aggiungi nodi mancanti (presenti in heatmaps.json ma non in NODES)
+  const existingIds = new Set(NODES.map(n=>n.id));
+  Object.keys(data).forEach(celex=>{
+    if(existingIds.has(celex)) return;
+    const arts2=data[celex]; if(!arts2||!arts2.length) return;
+    const tot2=KEYS.map(k=>arts2.reduce((s,a)=>s+(a.lamf?(+a.lamf[k]||0):0),0)/arts2.length);
+    const di=tot2.indexOf(Math.max(...tot2));
+    const ps2=tot2.reduce((a,b)=>a+b,0)||1;
+    const pn2=tot2.map(v=>v/ps2);
+    const H2=Math.max(0,-pn2.reduce((acc,p)=>acc+p*Math.log2(p+eps),0)/Math.log2(Math.max(tot2.length,2)));
+    const newNode={id:celex,title:celex,heatmap:'computed',
+      H:isFinite(H2)?H2:0, n:arts2.length,
+      lamf:Object.fromEntries(KEYS.map((k,i)=>[k,tot2[i]])),
+      dominant_lamf:KEYS[di], dom:(L1[di]+' '+L2[di]).trim()};
+    // Posizione iniziale sparsa attorno al centro — evita sovrapposizione
+    newNode.x = W/2 + (Math.random()-0.5)*300;
+    newNode.y = H/2 + (Math.random()-0.5)*300;
+    NODES.push(newNode);
+  });
+
+  // 6. Ridisegna tutto il layer nodi con il join D3 aggiornato
+  try {
+    const nodeGroup = d3.select(ns.node().parentNode);
+    const allNs = nodeGroup.selectAll('g.node')
+      .data(NODES, d=>d.id)
+      .join(enter=>{
+        const ng=enter.append('g').attr('class','node')
+          .call(d3.drag()
+            .on("start",(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y})
+            .on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y})
+            .on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}));
+        ng.append('circle')
+          .attr('r',d=>nr(d.n)).attr('fill',d=>hcol(d.H)).attr('fill-opacity',.85)
+          .attr('stroke',d=>d.eu?'#aac8f0':hcol(d.H))
+          .attr('stroke-width',d=>d.eu?2:1).attr('stroke-opacity',.6)
+          .attr('stroke-dasharray',d=>d.eu?'4,2':null);
+        ng.append('text').attr('dy',d=>nr(d.n)+9).attr('text-anchor','middle').text(d=>d.id);
+        ng.on('mouseover',(e,d)=>{
+          const sc=d.H>=.25?"#e07070":d.H>=.1?"#c9b840":"#58b872";
+          tip.innerHTML=`<div class="ti">${d.id}</div><div class="tt">${d.title||d.id}</div>`+
+            `<div class="tr"><span>H</span><span class="tv" style="color:${sc}">${d.H.toFixed(3)}</span></div>`+
+            `<div class="tr"><span>Articles</span><span class="tv">${d.n}</span></div>`+
+            `<div class="tr"><span>Dom.</span><span class="tv">${d.dom}</span></div>`+
+            `<div class="tc">↗ Click for heatmap</div>`;
+          tip.style.opacity="1";
+          lnk.classed("active",l=>l.source.id===d.id||l.target.id===d.id)
+             .classed("dimmed",l=>!(l.source.id===d.id||l.target.id===d.id));
+        }).on('mousemove',e=>{
+          const r=gp.getBoundingClientRect();
+          let x=e.clientX-r.left+14,y=e.clientY-r.top-10;
+          if(x+290>W)x=e.clientX-r.left-304;
+          tip.style.left=x+"px";tip.style.top=y+"px";
+        }).on('mouseleave',()=>{
+          tip.style.opacity="0";
+          lnk.classed("active",false).classed("dimmed",false);
+          lnk.style("opacity",d=>!activeF.has(d.family)?0.08:eo(d.w));
+        }).on('click',(e,d)=>{
+          e.stopPropagation(); hint.classList.add("gone");
+          if(selId===d.id){closeP();return}
+          selId=d.id;
+          nodeGroup.selectAll('g.node').classed("sel",n=>n.id===d.id);
+          openP(d);
+        });
+        return ng;
+      });
+    // Aggiorna colori su tutti i nodi (vecchi e nuovi)
+    allNs.select('circle')
+      .attr('fill',d=>hcol(d.H)).attr('stroke',d=>d.eu?'#aac8f0':hcol(d.H)).attr('r',d=>nr(d.n));
+    // Aggiunge i nuovi nodi alla simulazione e riavvia
+    sim.nodes(NODES);
+    sim.force("collision").initialize(NODES);
+    sim.alpha(0.4).restart();
+  } catch(e){ console.warn('nodes update failed:', e); }
+};
+
 fetch('heatmaps.json?v=' + Date.now())
   .then(function(r) { return r.json(); })
   .then(function(data) {
@@ -349,10 +476,17 @@ fetch('heatmaps.json?v=' + Date.now())
     if (typeof window.__onHeatmapsLoaded === 'function') {
       window.__onHeatmapsLoaded(data);
     }
+
+  const hc=document.getElementById('h-count');
+  if(hc){
+    const nEU=NODES.filter(n=>n.eu).length;
+    const nIT=NODES.length-nEU;
+    hc.textContent=`${NODES.length} atti (${nIT} IT + ${nEU} EU) · 4 livelli Lamfalussy · 5 tipi di arco`;
+  }
   })
   .catch(function(e) { console.error('Failed to load heatmaps.json:', e); });
-const L1     = ["Foundational scope", "Structural and", "Operational application", "Technical implementation"];
-const L2     = ["and principles", "enabling rules", "rules", "details"];
+const L1     = ["Level 1", "Level 2", "Level 3", "Level 4"];
+const L2     = ["Framework", "Operational", "Supervisory", "Enforcement"];
 const IMG452 = "";
 
 // Edge family → colour (matches CSS vars)
@@ -369,7 +503,7 @@ const LAYER_COLORS = ['#4f8ef7','#b090e0','#d4a030','#3a9c6e','#c85c3a','#4a6fa8
 // Edge weight → stroke-width
 function ew(w){ return w===3 ? 3.2 : w===2 ? 2.0 : 1.1; }
 // Edge weight → opacity multiplier (heavier = more visible)
-function eo(w){ return w===3 ? .75 : w===2 ? .55 : .38; }
+function eo(w){ return w===3 ? .18 : w===2 ? .13 : .08; }
 
 function hcol(h){
   // Mapping diretto [0,1] — niente *2. Palette con più stop nel range 0.4–0.8
@@ -431,7 +565,15 @@ const sim = d3.forceSimulation(NODES)
   .force("link",      d3.forceLink(links).id(d=>d.id).distance(d=>95+nr(d.source.n||1)+nr(d.target.n||1)).strength(.5))
   .force("charge",    d3.forceManyBody().strength(-380))
   .force("center",    d3.forceCenter(W/2, H/2))
-  .force("collision", d3.forceCollide(d=>nr(d.n)+10));
+  .force("collision", d3.forceCollide(d=>nr(d.n)+10))
+  .force("bounds",    d3.forceRadial(d=>{
+    // Nodi isolati (senza archi) vengono attirati verso un anello vicino al centro
+    const hasLinks = links.some(l=>l.s===d.id||l.t===d.id||l.source===d.id||l.target===d.id);
+    return hasLinks ? 0 : 180;
+  }, W/2, H/2).strength(d=>{
+    const hasLinks = links.some(l=>l.s===d.id||l.t===d.id||l.source===d.id||l.target===d.id);
+    return hasLinks ? 0 : 0.15;
+  }));
 
 const ns = g.append("g").selectAll("g.node").data(NODES).join("g").attr("class","node")
   .call(d3.drag()
@@ -450,7 +592,6 @@ ns.append("circle")
 ns.append("text").attr("dy",d=>nr(d.n)+9).attr("text-anchor","middle").text(d => d.id);
 
 sim.on("tick",()=>{
-  // Shorten lines so arrowhead doesn't overlap the node circle
   lnk.each(function(d){
     if(!d.source.x) return;
     const dx=d.target.x-d.source.x, dy=d.target.y-d.source.y;
@@ -462,7 +603,8 @@ sim.on("tick",()=>{
       .attr("x2", d.target.x - dx/dist*rTgt)
       .attr("y2", d.target.y - dy/dist*rTgt);
   });
-  ns.attr("transform",d=>`translate(${d.x},${d.y})`);
+  // Seleziona TUTTI i nodi (inclusi quelli aggiunti dinamicamente)
+  g.selectAll("g.node").attr("transform",d=>`translate(${d.x||0},${d.y||0})`);
 });
 
 // ── Edge family filter ──────────────────────────────────────────────────────
@@ -583,7 +725,7 @@ function openP(d){
   document.getElementById("ph-dom").textContent=d.dom;
   const sc=document.getElementById("ph-sc");
   sc.textContent="ᴸH = "+d.H.toFixed(3);
-  sc.title = "Shannon entropy on Lamfalussy L1–L2 (0=pure, 1=uniform)";
+  sc.title = "Shannon entropy sui 4 layer emersi (0=puro, 1=uniforme)";
   sc.className="ps";
   const _scC = d3.color(hcol(d.H));
   sc.style.color = _scC.brighter(0.4).formatHex();
@@ -592,44 +734,23 @@ function openP(d){
   // Lamfalussy badge — shown if available in data
   const lb=document.getElementById("ph-lamf");
   if(d.eu){lb.textContent="🇪🇺 EU";lb.style.display="inline";lb.style.background="rgba(26,127,193,.15)"}
-  else if(d.dominant_lamf){lb.textContent=d.dominant_lamf;lb.style.display="inline";lb.style.background=""}
+  else if(d.dom){lb.textContent=d.dom.slice(0,22)+(d.dom.length>22?'…':'');lb.style.display="inline";lb.style.background=""}
   else lb.style.display="none";
 
   // Lamfalussy distribution bar
   const lamfBar=document.getElementById('ph-lamf-bar');
   if(d.lamf){
     lamfBar.style.display='block';
-    ['L1','L2'].forEach(k=>{
+    ['L1','L2','L3','L4'].forEach(k=>{
       const pct=d.lamf[k]||0;
       document.getElementById('lbs-'+k).style.width=pct+'%';
       document.getElementById('lpct-'+k).textContent=' '+Math.round(pct)+'%';
     });
   } else { lamfBar.style.display='none'; }
 
-  // Emerged-layers distribution bar (media sui valori articoli × layer)
-  const layersBar = document.getElementById('ph-layers-bar');
-  const trackEl   = document.getElementById('lbs-layers-track');
-  const lblsEl    = document.getElementById('lbs-layers-lbls');
-  const artsPL    = (typeof window.__HEATMAPS__!=='undefined') ? window.__HEATMAPS__[d.id] : null;
-  if(artsPL && artsPL.length){
-    const totals = L1.map((_, j) =>
-      artsPL.reduce((acc, a) => acc + (a.vals[j] || 0), 0) / artsPL.length
-    );
-    const shortNames = L1.map((t, j) => {
-      const second = (L2[j] || '').trim();
-      return (t.split(' ')[0] || t).slice(0, 8);
-    });
-    trackEl.innerHTML = totals.map((v, j) =>
-      `<div class="lamf-seg" style="width:${v}%;background:${LAYER_COLORS[j % LAYER_COLORS.length]}" title="${L1[j]} ${L2[j]||''}: ${v.toFixed(1)}%"></div>`
-    ).join('');
-    lblsEl.innerHTML = totals.map((v, j) => {
-      const fullName = `${L1[j] || ''} ${L2[j] || ''}`.trim();
-      return `<span style="color:${LAYER_COLORS[j % LAYER_COLORS.length]}">${fullName}<span class="lamf-lbl-pct"> ${Math.round(v)}%</span></span>`;
-    }).join('');
-    layersBar.style.display = 'block';
-  } else {
-    layersBar.style.display = 'none';
-  }
+  // ph-layers-bar rimossa: mostrava media di a.vals (layer emersi) con etichette
+  // Lamfalussy — risultato sempre ~25% uniforme. La ph-lamf-bar sopra è sufficiente.
+  document.getElementById('ph-layers-bar').style.display = 'none';
 
   hmScale=1;document.getElementById("z-val").textContent="100%";
   const pc=document.getElementById("pc");
@@ -637,6 +758,36 @@ function openP(d){
   const tb=document.getElementById("hm-toolbar");
 
   const arts=(typeof window.__HEATMAPS__!=='undefined')?window.__HEATMAPS__[d.id]:null;
+
+  // Sovrascrive badge H e barra distribuzione con dati live da heatmaps.json.
+  // I valori in NODES[] possono essere stale; la fonte autorevole e' a.lamf
+  // degli articoli effettivamente classificati.
+  // Wrappato in try-catch: un eventuale errore NON deve impedire il render della heatmap.
+  if(arts&&arts.length){ try {
+    const LAMF_KEYS=['L1','L2','L3','L4'];
+    const livePct=LAMF_KEYS.map(k=>
+      arts.reduce((s,a)=>s+(a.lamf?+(a.lamf[k]||0):0),0)/arts.length
+    );
+    // H(distribuzione media) — stessa formula della riga AGGR nella heatmap
+    const eps_badge=1e-9;
+    const ps_badge=livePct.reduce((a,b)=>a+b,0)||1;
+    const pn_badge=livePct.map(v=>v/ps_badge);
+    const liveH=-pn_badge.reduce((acc,p)=>acc+p*Math.log2(p+eps_badge),0)/Math.log2(Math.max(livePct.length,2));
+    const safeH=isFinite(liveH)&&liveH>=0?liveH:0;
+    sc.textContent='\u1d38H = '+safeH.toFixed(3);
+    const _lC=d3.color(hcol(safeH));
+    if(_lC){
+      sc.style.color=_lC.brighter(0.4).formatHex();
+      sc.style.background='rgba('+_lC.r+','+_lC.g+','+_lC.b+',0.15)';
+      sc.style.border='1px solid rgba('+_lC.r+','+_lC.g+','+_lC.b+',0.4)';
+    }
+    lamfBar.style.display='block';
+    LAMF_KEYS.forEach((k,i)=>{
+      document.getElementById('lbs-'+k).style.width=livePct[i]+'%';
+      document.getElementById('lpct-'+k).textContent=' '+Math.round(livePct[i])+'%';
+    });
+  } catch(e){ console.warn('live override failed:', e); } }
+
   closeArtPanel();
   if(d.heatmap==="png"&&!arts){
     lgd.style.display="none";tb.style.display="flex";
@@ -684,7 +835,7 @@ function computeHLamf(lamf){
 
 function buildHM(arts){
   const CW=120,CH=28,LW=64,EBW=40,ELW=30,EGAP=10,PT=150;
-  const EW=(EBW+ELW+EGAP)*2+2;
+  const EW=EBW+ELW+4;  // colonna singola H (layer emersi); Lamfalussy H rimossa
   const TH=30, GAP=8;                                    // riga aggregata
   const nL=L1.length,nA=arts.length;
   const W=LW+nL*CW+EW+4, H=PT+nA*CH+GAP+TH+12;           // +GAP+TH
@@ -705,65 +856,70 @@ function buildHM(arts){
     el.appendChild(mk("line",{x1:cx-CW/2+1,y1:PT-5,x2:cx+CW/2-1,y2:PT-5,stroke:"#252a3a","stroke-width":"1"}));
   });
   const ehx=LW+nL*CW+EBW/2+6;
-  const elhx=LW+nL*CW+EBW+ELW+EGAP+EBW/2+6;
-  el.appendChild(mk("text",{x:ehx,y:PT-28,"font-size":"10",fill:"#8898c0","text-anchor":"middle"},"Layers"));
-  el.appendChild(mk("text",{x:ehx,y:PT-14,"font-size":"10",fill:"#8898c0","text-anchor":"middle"},"H entropy"));
-  el.appendChild(mk("text",{x:elhx,y:PT-28,"font-size":"10",fill:"#b090e0","text-anchor":"middle"},"Lamf"));
-  el.appendChild(mk("text",{x:elhx,y:PT-14,"font-size":"10",fill:"#b090e0","text-anchor":"middle"},"H entropy"));
+  el.appendChild(mk("text",{x:ehx,y:PT-28,"font-size":"10",fill:"#8898c0","text-anchor":"middle"},"H"));
+  el.appendChild(mk("text",{x:ehx,y:PT-14,"font-size":"10",fill:"#8898c0","text-anchor":"middle"},"entropia"));
+
+  // ── Sort numerico articoli ───────────────────────────────────────────────
+  arts = [...arts].sort((a,b)=>{
+    const na=parseInt(String(a.id).replace(/\D/g,''),10)||0;
+    const nb=parseInt(String(b.id).replace(/\D/g,''),10)||0;
+    return na-nb;
+  });
+  // Helper: mostra solo la parte numerica ("art3"→"3", "1"→"1")
+  function artLabel(id){const m=String(id).match(/\d+/);return m?m[0]:String(id);}
 
   // ── Righe articolo ──────────────────────────────────────────────────────
+  // LAMF_KEYS: ordine fisso L1→L4, usato per estrarre valori da a.lamf
+  const LAMF_KEYS = ['L1','L2','L3','L4'];
   arts.forEach((a,i)=>{
     const y=PT+i*CH;
     if(i%2===0)el.appendChild(mk("rect",{x:LW,y,width:nL*CW,height:CH,fill:"rgba(255,255,255,.018)"}));
     const hasInteraction = a.txt || (a.ev&&a.ev.length) || a.lamf;
-    const ov=mk('rect',{x:0,y,width:LW,height:CH,fill:'transparent',cursor:hasInteraction?'pointer':'default','data-i':i});
+    const ov=mk('rect',{x:0,y,width:LW+nL*CW,height:CH,fill:'transparent',cursor:hasInteraction?'pointer':'default','data-i':i});
     if(hasInteraction){
       ov.addEventListener('click',()=>openArtPanel(a.id,a.txt||'',a.ev||[],a.lamf||null));
       ov.addEventListener('mouseenter',()=>{ov.setAttribute('fill','rgba(255,255,255,.04)');});
       ov.addEventListener('mouseleave',()=>{ov.setAttribute('fill','transparent');});
     }
     el.appendChild(ov);
+    // Legge i valori da a.lamf (Lamfalussy), non da a.vals (layer emersi obsoleti)
+    const lamfVals = LAMF_KEYS.map(k => a.lamf ? (a.lamf[k] || 0) : 0);
+    const H_art = computeHLamf(a.lamf) ?? 0;
     el.appendChild(mk("text",{x:LW-5,y:y+CH*.68,"font-size":"11.5",
-      fill:a.H>.5?"#b0c4e8":a.H>.2?"#8899bb":"#5a6a8a",
-      "font-weight":a.H>.5?"500":"400","text-anchor":"end"},a.id));
-    a.vals.forEach((v,j)=>{
+      fill:H_art>.5?"#b0c4e8":H_art>.2?"#8899bb":"#5a6a8a",
+      "font-weight":H_art>.5?"500":"400","text-anchor":"end"},artLabel(a.id)));
+    lamfVals.forEach((v,j)=>{
       const x=LW+j*CW;
       el.appendChild(mk("rect",{x,y,width:CW-1,height:CH-1,fill:cblue(v),rx:"1.5"}));
       if(v>0){
         const tf=v>50?"rgba(255,255,255,.95)":v>20?"rgba(200,218,250,.85)":"rgba(100,130,190,.75)";
-        el.appendChild(mk("text",{x:x+CW/2,y:y+CH*.68,"font-size":"10.5",fill:tf,"font-weight":v>50?"500":"400","text-anchor":"middle"},v+"%"));
+        el.appendChild(mk("text",{x:x+CW/2,y:y+CH*.68,"font-size":"10.5",fill:tf,"font-weight":v>50?"500":"400","text-anchor":"middle"},v.toFixed(1)+"%"));
       }
     });
-    // H layer emersi
-    const bx=LW+nL*CW+6,bw=Math.max(0,a.H*EBW);
+    // H Lamfalussy (unica colonna entropia)
+    const bx=LW+nL*CW+6,bw=Math.max(0,H_art*EBW);
     el.appendChild(mk("rect",{x:bx,y:y+4,width:EBW,height:CH-9,fill:"#141820",rx:"2.5"}));
-    el.appendChild(mk("rect",{x:bx,y:y+4,width:bw,height:CH-9,fill:ecol(a.H),rx:"2.5",opacity:".88"}));
-    el.appendChild(mk("text",{x:bx+EBW+6,y:y+CH*.68,"font-size":"10.5",fill:ecol(a.H),"font-weight":"500","text-anchor":"start"},a.H<=0?"0.00":a.H.toFixed(2)));
-    // H Lamfalussy
-    const Hl=a.H_lamf!=null?a.H_lamf:computeHLamf(a.lamf);
-    const bxL=bx+EBW+ELW+EGAP,bwL=Hl!=null?Math.max(0,Hl*EBW):0;
-    el.appendChild(mk("rect",{x:bxL,y:y+4,width:EBW,height:CH-9,fill:"#141820",rx:"2.5"}));
-    if(Hl!=null){
-      el.appendChild(mk("rect",{x:bxL,y:y+4,width:bwL,height:CH-9,fill:ecol(Hl),rx:"2.5",opacity:".88"}));
-      el.appendChild(mk("text",{x:bxL+EBW+6,y:y+CH*.68,"font-size":"10.5",fill:ecol(Hl),"font-weight":"500","text-anchor":"start"},Hl<=0?"0.00":Hl.toFixed(2)));
-    } else {
-      el.appendChild(mk("text",{x:bxL+EBW+6,y:y+CH*.68,"font-size":"10",fill:"#3a4258","text-anchor":"start"},"—"));
-    }
+    el.appendChild(mk("rect",{x:bx,y:y+4,width:bw,height:CH-9,fill:ecol(H_art),rx:"2.5",opacity:".88"}));
+    el.appendChild(mk("text",{x:bx+EBW+6,y:y+CH*.68,"font-size":"10.5",fill:ecol(H_art),"font-weight":"500","text-anchor":"start"},H_art<=0?"0.00":H_art.toFixed(2)));
   });
 
   // ── Grid lines interne ──────────────────────────────────────────────────
   for(let i=0;i<=nA;i++){const y=PT+i*CH;el.appendChild(mk("line",{x1:LW,y1:y,x2:LW+nL*CW,y2:y,stroke:"#1c2030","stroke-width":"1"}))}
   for(let j=0;j<=nL;j++){const x=LW+j*CW;el.appendChild(mk("line",{x1:x,y1:PT,x2:x,y2:PT+nA*CH,stroke:"#1c2030","stroke-width":"1"}))}
 
-  // ── Riga AGGREGATO (media sui layer emersi + entropia complessiva) ─────
+  // ── Riga AGGREGATO — medie Lamfalussy su tutti gli articoli ───────────────
   const yT = PT + nA*CH + GAP;
-  const totals = L1.map((_, j) =>
-    arts.reduce((acc, a) => acc + (a.vals[j] || 0), 0) / Math.max(arts.length,1)
+  // Calcola media per ogni livello Lamfalussy da a.lamf (non da a.vals obsoleto)
+  const totals = LAMF_KEYS.map(k =>
+    arts.reduce((acc, a) => acc + (a.lamf ? (a.lamf[k] || 0) : 0), 0) / Math.max(arts.length,1)
   );
-  const eps = 1e-9;
+  // Entropia aggregata: H della distribuzione media — H(mean(vals))
+  // Misura quanto è sparso il contenuto dell'atto tra i layer nell'aggregato.
+  // Distinta da d.H (badge nodo) = mean(H_i) = ibridità media degli articoli.
+  const eps_agg = 1e-9;
   const pSum = totals.reduce((a,b)=>a+b,0) || 1;
-  const pNorm = totals.map(v => v/pSum);
-  let Hagg = -pNorm.reduce((acc,p)=>acc + p * Math.log2(p+eps), 0) / Math.log2(Math.max(nL,2));
+  const pNorm = totals.map(v => v / pSum);
+  let Hagg = -pNorm.reduce((acc,p)=>acc + p * Math.log2(p + eps_agg), 0) / Math.log2(Math.max(totals.length, 2));
   if (!isFinite(Hagg) || Hagg < 0) Hagg = 0;
 
   // separatore marcato
@@ -785,23 +941,14 @@ function buildHM(arts){
         "font-weight":"600",fill:tf,"text-anchor":"middle"},Math.round(v)+"%"));
     }
   });
-  // entropia aggregata (layer emersi)
+  // entropia aggregata (layer emersi) — unica colonna
   const bxT=LW+nL*CW+6, bwT=Math.max(0,Hagg*EBW);
   el.appendChild(mk("rect",{x:bxT,y:yT+5,width:EBW,height:TH-11,fill:"#141820",rx:"2.5"}));
   el.appendChild(mk("rect",{x:bxT,y:yT+5,width:bwT,height:TH-11,fill:ecol(Hagg),rx:"2.5",opacity:".88"}));
   el.appendChild(mk("text",{x:bxT+EBW+6,y:yT+TH*.68,"font-size":"11",
     fill:ecol(Hagg),"font-weight":"600","text-anchor":"start"},
     Hagg<=0?"0.00":Hagg.toFixed(2)));
-  // entropia aggregata (Lamfalussy)
-  const lamfVals=arts.map(a=>a.H_lamf!=null?a.H_lamf:computeHLamf(a.lamf)).filter(h=>h!=null);
-  const HaggL=lamfVals.length?lamfVals.reduce((a,b)=>a+b,0)/lamfVals.length:null;
-  const bxTL=bxT+EBW+ELW+EGAP, bwTL=HaggL!=null?Math.max(0,HaggL*EBW):0;
-  el.appendChild(mk("rect",{x:bxTL,y:yT+5,width:EBW,height:TH-11,fill:"#141820",rx:"2.5"}));
-  if(HaggL!=null){
-    el.appendChild(mk("rect",{x:bxTL,y:yT+5,width:bwTL,height:TH-11,fill:ecol(HaggL),rx:"2.5",opacity:".88"}));
-    el.appendChild(mk("text",{x:bxTL+EBW+6,y:yT+TH*.68,"font-size":"11",
-      fill:ecol(HaggL),"font-weight":"600","text-anchor":"start"},HaggL<=0?"0.00":HaggL.toFixed(2)));
-  }
+  // (H Lamfalussy rimossa — v. fix commit 2025-04)
 
   return el;
 }

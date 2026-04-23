@@ -1,0 +1,30 @@
+label,fonte,n_articoli,n_citazioni,validation,reason
+D.Lgs. 36/2023,html_akn,229,8,✓ OK,AKN: numero+anno nel titolo/preambolo
+D.Lgs. 50/2016,html_akn,220,2,✓ OK,AKN: numero+anno nel titolo/preambolo
+D.Lgs. 163/2006,html_akn,257,1,✓ OK,AKN: numero+anno nel titolo/preambolo
+D.Lgs. 209/2024,html_akn,97,6,✓ OK,AKN: numero+anno nel titolo/preambolo
+D.Lgs. 56/2017,html_akn,131,9,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 78/2022,html_akn,2,9,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 11/2016,html_akn,1,13,✓ OK,AKN: articoli popolati (match titolo non verificabile)
+D.P.R. 207/2010,html_akn,359,10,✓ OK,AKN: articoli popolati (match titolo non verificabile)
+L. 108/2021,html_akn,1,4,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 120/2020,html_akn,1,3,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 55/2019,html_akn,1,3,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 114/2014,html_akn,1,2,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 241/1990,html_akn,31,1,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 190/2012,html_akn,2,57,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 90/2024,html_akn,24,7,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 136/2010,html_akn,16,16,✓ OK,AKN: numero+anno nel titolo/preambolo
+D.Lgs. 33/2013,html_akn,53,10,✓ OK,AKN: articoli popolati (match titolo non verificabile)
+D.Lgs. 97/2016,html_akn,44,18,✓ OK,AKN: articoli popolati (match titolo non verificabile)
+D.Lgs. 218/2012,html_akn,10,16,✓ OK,AKN: articoli popolati (match titolo non verificabile)
+D.Lgs. 228/2011,html_akn,11,23,✓ OK,AKN: articoli popolati (match titolo non verificabile)
+D.Lgs. 229/2011,html_akn,12,12,✓ OK,AKN: articoli popolati (match titolo non verificabile)
+D.Lgs. 59/2010,html_akn,86,6,✓ OK,AKN: numero+anno nel titolo/preambolo
+D.M. 154/2017,html_akn,28,1,✓ OK,AKN: articoli popolati (match titolo non verificabile)
+D.L. 13/2023,html_akn,58,17,✓ OK,AKN: articoli popolati (match titolo non verificabile)
+L. 56/2024,html_akn,1,2,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 105/2025,html_akn,1,2,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 145/2018,html_akn,19,55,✓ OK,AKN: articoli popolati (match titolo non verificabile)
+D.L. 135/2018,html_akn,12,16,✓ OK,AKN: numero+anno nel titolo/preambolo
+L. 98/2013,html_akn,1,3,✓ OK,AKN: numero+anno nel titolo/preambolo

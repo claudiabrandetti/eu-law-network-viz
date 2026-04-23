@@ -32,3 +32,6 @@ dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:dec
 dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,"decreto legislativo 12 aprile 2006, n. 163",True
 dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:legge:2010-08-13;136,l_136_2010,"legge 13 agosto 2010, n. 136",True
 dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:decreto.legislativo:2013-03-14;33,dlgs_33_2013,"articolo 2-bis del decreto legislativo 14 marzo 2013, n. 33",True
+dm_154_2017,urn:nir:stato:decreto.ministeriale:2017-08-22;154,urn:nir:stato:decreto.legislativo:2023-03-31;36,dlgs_36_2023,"D.LGS. 31 MARZO 2023, N. 36",True
+dl_13_2023,urn:nir:stato:decreto.legge:2023-02-24;13,urn:nir:stato:legge:2021-07-29;108,l_108_2021,"legge 29 luglio 2021, n. 108",True
+dl_135_2018,urn:nir:stato:decreto.legge:2018-12-14;135,urn:nir:stato:legge:2018-12-30;145,l_145_2018,"articolo 1 della legge 30 dicembre 2018, n. 145",True
