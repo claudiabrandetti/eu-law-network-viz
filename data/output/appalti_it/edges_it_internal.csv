@@ -1,37 +1,84 @@
-src_slug,src_urn,dst_urn,dst_slug,testo_rif,interno
-dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:decreto.legislativo:2016-04-18;50,dlgs_50_2016,"decreto legislativo 18 aprile 2016, n. 50",True
-dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,Codice dei contratti pubblici,True
-dlgs_36_2023,urn:nir:stato:decreto.legislativo:2023-03-31;36,urn:nir:stato:legge:2022-06-21;78,l_78_2022,"legge 21 giugno 2022, n. 78",True
-dlgs_50_2016,urn:nir:stato:decreto.legislativo:2016-04-18;50,urn:nir:stato:decreto.legislativo:2023-03-31;36,dlgs_36_2023,"D.LGS. 31 MARZO 2023, N. 36",True
-dlgs_163_2006,urn:nir:stato:decreto.legislativo:2006-04-12;163,urn:nir:stato:decreto.legislativo:2016-04-18;50,dlgs_50_2016,"D.LGS. 18 APRILE 2016, N. 50",True
-dlgs_209_2024,urn:nir:stato:decreto.legislativo:2024-12-31;209,urn:nir:stato:legge:2022-06-21;78,l_78_2022,"legge 21 giugno 2022, n. 78",True
-dlgs_209_2024,urn:nir:stato:decreto.legislativo:2024-12-31;209,urn:nir:stato:decreto.legislativo:2023-03-31;36,dlgs_36_2023,"decreto legislativo 31 marzo 2023, n. 36",True
-dlgs_209_2024,urn:nir:stato:decreto.legislativo:2024-12-31;209,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,Codice dei contratti pubblici,True
-dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:legge:2016-01-28;11,l_11_2016,"legge 28 gennaio 2016, n. 11",True
-dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:decreto.legislativo:2016-04-18;50,dlgs_50_2016,"decreto legislativo 18 aprile 2016, n. 50",True
-dlgs_56_2017,urn:nir:stato:decreto.legislativo:2017-04-19;56,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,Codice dei contratti pubblici,True
-l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,codice dei contratti pubblici,True
-l_11_2016,urn:nir:stato:legge:2016-01-28;11,urn:nir:stato:decreto.legislativo:2011-12-29;228,dlgs_228_2011,"articolo 2 del decreto legislativo 29 dicembre 2011, n. 228",True
-dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,"articolo 5 del decreto legislativo 12 aprile 2006, n. 163",True
-dpr_207_2010,urn:nir:stato:decreto.del.presidente.della.repubblica:2010-10-05;207,urn:nir:stato:decreto.legislativo:2016-04-18;50,dlgs_50_2016,"D.LGS. 18 APRILE 2016, N. 50",True
-l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2016-04-18;50,dlgs_50_2016,"D.LGS. 18 APRILE 2016, N. 50",True
-l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2017-04-19;56,dlgs_56_2017,"D.LGS. 19 APRILE 2017, N. 56",True
-l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2013-03-14;33,dlgs_33_2013,"articolo 2-bis, comma 2, del decreto legislativo 14 marzo 2013, n. 33",True
-l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2016-05-25;97,dlgs_97_2016,"D.LGS. 25 MAGGIO 2016, N. 97",True
-l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:1990-08-07;241,l_241_1990,"articolo 15 della legge 7 agosto 1990, n. 241",True
-l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,codice dei contratti pubblici,True
-l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:decreto.legislativo:2023-03-31;36,dlgs_36_2023,"D.LGS. 31 MARZO 2023, N. 36",True
-l_190_2012,urn:nir:stato:legge:2012-11-06;190,urn:nir:stato:legge:2014-08-11;114,l_114_2014,"L. 11 agosto 2014, n. 114",True
-dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:legge:2012-11-06;190,l_190_2012,"legge 6 novembre 2012, n. 190",True
-dlgs_33_2013,urn:nir:stato:decreto.legislativo:2013-03-14;33,urn:nir:stato:legge:1990-08-07;241,l_241_1990,"legge 7 agosto 1990, n. 241",True
-dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:legge:1990-08-07;241,l_241_1990,"legge 7 agosto 1990, n. 241",True
-dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:legge:2012-11-06;190,l_190_2012,"legge 6 novembre 2012, n. 190",True
-dlgs_97_2016,urn:nir:stato:decreto.legislativo:2016-05-25;97,urn:nir:stato:decreto.legislativo:2013-03-14;33,dlgs_33_2013,"decreto legislativo 14 marzo 2013, n. 33",True
-dlgs_218_2012,urn:nir:stato:decreto.legislativo:2012-11-15;218,urn:nir:stato:legge:2010-08-13;136,l_136_2010,articoli 1,True
-dlgs_228_2011,urn:nir:stato:decreto.legislativo:2011-12-29;228,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,"decreto legislativo 12 aprile 2006, n. 163",True
-dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:decreto.legislativo:2006-04-12;163,dlgs_163_2006,"decreto legislativo 12 aprile 2006, n. 163",True
-dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:legge:2010-08-13;136,l_136_2010,"legge 13 agosto 2010, n. 136",True
-dlgs_229_2011,urn:nir:stato:decreto.legislativo:2011-12-29;229,urn:nir:stato:decreto.legislativo:2013-03-14;33,dlgs_33_2013,"articolo 2-bis del decreto legislativo 14 marzo 2013, n. 33",True
-dm_154_2017,urn:nir:stato:decreto.ministeriale:2017-08-22;154,urn:nir:stato:decreto.legislativo:2023-03-31;36,dlgs_36_2023,"D.LGS. 31 MARZO 2023, N. 36",True
-dl_13_2023,urn:nir:stato:decreto.legge:2023-02-24;13,urn:nir:stato:legge:2021-07-29;108,l_108_2021,"legge 29 luglio 2021, n. 108",True
-dl_135_2018,urn:nir:stato:decreto.legge:2018-12-14;135,urn:nir:stato:legge:2018-12-30;145,l_145_2018,"articolo 1 della legge 30 dicembre 2018, n. 145",True
+src_slug,dst_slug,type,family,w
+dlgs_36_2023,l_241_1990,CITES,ref,1
+dlgs_36_2023,dlgs_33_2013,CITES,ref,1
+dlgs_36_2023,l_136_2010,CITES,ref,1
+dlgs_36_2023,l_114_2014,CITES,ref,1
+dlgs_36_2023,dl_135_2018,BASED_ON,hier,2
+dlgs_36_2023,l_190_2012,CITES,ref,1
+dlgs_36_2023,dlgs_50_2016,CITES,ref,1
+dlgs_36_2023,l_78_2022,CITES,ref,1
+dlgs_36_2023,l_55_2019,BASED_ON,hier,2
+dlgs_36_2023,dlgs_228_2011,CITES,ref,1
+dlgs_36_2023,l_120_2020,AMENDS,mod,2
+dlgs_36_2023,dlgs_229_2011,BASED_ON,hier,2
+dlgs_36_2023,l_108_2021,CITES,ref,1
+dlgs_36_2023,dl_13_2023,CITES,ref,1
+dlgs_36_2023,dlgs_163_2006,CITES,ref,1
+dlgs_36_2023,dpr_207_2010,CITES,ref,1
+dlgs_36_2023,dlgs_209_2024,CITES,ref,1
+dlgs_50_2016,dlgs_36_2023,REPEALS,mod,2
+dlgs_163_2006,dlgs_50_2016,REPEALS,mod,2
+dlgs_163_2006,dlgs_56_2017,AMENDS,mod,2
+dlgs_209_2024,dlgs_36_2023,AMENDS,mod,2
+dlgs_209_2024,l_241_1990,BASED_ON,hier,2
+dlgs_209_2024,dl_135_2018,BASED_ON,hier,2
+dlgs_209_2024,dlgs_50_2016,BASED_ON,hier,2
+dlgs_209_2024,dlgs_33_2013,CITES,ref,1
+dlgs_209_2024,l_120_2020,CITES,ref,1
+dlgs_209_2024,l_136_2010,DEROGATES,proc,1
+dlgs_56_2017,dlgs_50_2016,CITES,ref,1
+dlgs_56_2017,l_11_2016,CITES,ref,1
+dlgs_56_2017,dlgs_33_2013,REPEALS,mod,2
+dlgs_56_2017,dlgs_229_2011,CITES,ref,1
+dlgs_56_2017,l_190_2012,CITES,ref,1
+dlgs_56_2017,l_241_1990,AMENDS,mod,2
+dlgs_56_2017,l_114_2014,AMENDS,mod,2
+dlgs_56_2017,dlgs_163_2006,CITES,ref,1
+dlgs_56_2017,l_98_2013,CITES,ref,1
+l_11_2016,dlgs_163_2006,CITES,ref,1
+dpr_207_2010,dlgs_163_2006,CITES,ref,1
+dpr_207_2010,dlgs_50_2016,REPEALS,mod,2
+l_241_1990,dlgs_163_2006,CITES,ref,1
+l_190_2012,dlgs_33_2013,BASED_ON,hier,2
+l_190_2012,l_241_1990,BASED_ON,hier,2
+l_190_2012,dlgs_50_2016,REPEALS,mod,2
+l_190_2012,dlgs_56_2017,REPEALS,mod,2
+l_190_2012,dlgs_97_2016,CITES,ref,1
+l_90_2024,dlgs_36_2023,CITES,ref,1
+l_136_2010,dlgs_163_2006,BASED_ON,hier,2
+dlgs_33_2013,l_241_1990,CITES,ref,1
+dlgs_33_2013,l_78_2022,BASED_ON,hier,2
+dlgs_33_2013,dlgs_229_2011,BASED_ON,hier,2
+dlgs_33_2013,dlgs_228_2011,CITES,ref,1
+dlgs_33_2013,l_190_2012,CITES,ref,1
+dlgs_33_2013,dlgs_97_2016,REPEALS,mod,2
+dlgs_97_2016,dlgs_33_2013,AMENDS,mod,2
+dlgs_97_2016,l_241_1990,AMENDS,mod,2
+dlgs_97_2016,l_190_2012,BASED_ON,hier,2
+dlgs_97_2016,dlgs_50_2016,BASED_ON,hier,2
+dlgs_97_2016,dlgs_229_2011,BASED_ON,hier,2
+dlgs_97_2016,dlgs_228_2011,CITES,ref,1
+dlgs_218_2012,l_136_2010,CITES,ref,1
+dlgs_218_2012,dlgs_163_2006,CITES,ref,1
+dlgs_228_2011,dlgs_163_2006,BASED_ON,hier,2
+dlgs_228_2011,dpr_207_2010,CITES,ref,1
+dlgs_228_2011,dlgs_50_2016,REPEALS,mod,2
+dlgs_228_2011,dlgs_33_2013,REPEALS,mod,2
+dlgs_229_2011,dlgs_33_2013,CITES,ref,1
+dlgs_229_2011,dlgs_163_2006,CITES,ref,1
+dlgs_229_2011,l_136_2010,BASED_ON,hier,2
+dlgs_59_2010,l_241_1990,CITES,ref,1
+dlgs_59_2010,dlgs_163_2006,DEROGATES,proc,1
+dm_154_2017,dlgs_36_2023,REPEALS,mod,2
+dl_13_2023,l_108_2021,CITES,ref,1
+dl_13_2023,l_55_2019,AMENDS,mod,2
+dl_13_2023,dlgs_33_2013,CITES,ref,1
+dl_13_2023,l_145_2018,CITES,ref,1
+dl_13_2023,dlgs_50_2016,DEROGATES,proc,1
+dl_13_2023,l_241_1990,BASED_ON,hier,2
+dl_13_2023,l_120_2020,CITES,ref,1
+dl_13_2023,l_56_2024,CITES,ref,1
+dl_13_2023,dlgs_36_2023,BASED_ON,hier,2
+l_145_2018,l_241_1990,CITES,ref,1
+dl_135_2018,l_145_2018,AMENDS,mod,2
+dl_135_2018,dlgs_50_2016,AMENDS,mod,2

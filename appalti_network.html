@@ -7,19 +7,21 @@
 <script>
 // ── Evidence text panel ──────────────────────────────────────────────────────
 const LCOL={L1:'#4f8ef7',L2:'#b090e0',L3:'#3a9c6e',L4:'#c85c3a'};
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // instructions:
 // python3 -m http.server 8080
-// http://localhost:8080/appalti_network_2_layers.html
-
+// http://localhost:8080/appalti_network.html
 
 function closeArtPanel(){
   document.getElementById('art-panel').style.display='none';
-  // ripristina barra atto corrente
+  document.getElementById('ap-body').innerHTML='';
+  document.getElementById('ap-pvlist').innerHTML='';
+  // ripristina barra del nodo corrente
   if(window.__currentNode__){
     const d=window.__currentNode__;
-    const lamfBar=document.getElementById('ph-lamf-bar');
     if(d.lamf){
+      const lamfBar=document.getElementById('ph-lamf-bar');
       lamfBar.style.display='block';
       ['L1','L2','L3','L4'].forEach(k=>{
         document.getElementById('lbs-'+k).style.width=(d.lamf[k]||0)+'%';
@@ -29,61 +31,341 @@ function closeArtPanel(){
   }
 }
 
-function highlightText(text,evidence){
-  const evs=[...evidence].sort((a,b)=>(b.testo||'').length-(a.testo||'').length);
+// Normalizza provision da qualunque formato:
+//   provisions_raw → {start, end, label, reason}
+//   evidence (ev)  → {testo, layer, motivo}
+function normPv(p){
+  const label = p.label || p.lv || p.layer || '';
+  const key   = label.startsWith('level_') ? 'L'+label.slice(-1).toUpperCase()
+              : (LCOL[label.toUpperCase()] ? label.toUpperCase() : '');
+  return {
+    key,
+    reason: p.reason || p.r || p.motivo || '',
+    start:  p.start != null ? p.start : null,
+    end:    p.end   != null ? p.end   : null,
+    testo:  p.testo || '',
+  };
+}
+
+// ── Provision range resolver (robusto, multi-strategia) ────────────────────
+// Per ciascuna provision tenta in ordine:
+//   (1) start/end espliciti, validi nel testo (1-based, inclusivi)
+//   (2) substring matching esatto con `testo`
+//   (3) fuzzy matching: normalizzazione di whitespace/punteggiatura/quote tipografiche
+// Restituisce array parallelo a pvs con {s, e, source} oppure null se non localizzata.
+// s,e sono indici di parola 0-based, inclusivi.
+function _normalizeForMatch(s){
+  return String(s)
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B\u2032]/g, "'")     // quote singole tipografiche
+    .replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"')     // quote doppie tipografiche
+    .replace(/[\u2013\u2014\u2212]/g, '-')                 // dashes
+    .replace(/[\u00A0]/g, ' ')                             // nbsp
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')                     // punteggiatura → spazio
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+function resolvePvRanges(text, pvs){
+  const words = text ? text.trim().split(/\s+/) : [];
+  const n = words.length;
+  const out = (pvs || []).map(() => null);
+  if(!pvs || !pvs.length || !n) return out;
+
+  // Pre-build hay/normHay per matching
+  const hay     = words.join(' ');
+  const normHay = _normalizeForMatch(hay);
+  // mappa offset-char → indice parola sulla versione normalizzata
+  const normWords = normHay.split(' ');
+
+  // Helper: trova indice parola in normWords cercando una sotto-sequenza
+  function findNormSubseq(normNeedle){
+    if(!normNeedle) return -1;
+    const needleWords = normNeedle.split(' ').filter(Boolean);
+    if(!needleWords.length) return -1;
+    outer: for(let i = 0; i <= normWords.length - needleWords.length; i++){
+      for(let j = 0; j < needleWords.length; j++){
+        if(normWords[i+j] !== needleWords[j]) continue outer;
+      }
+      return i; // start word index 0-based
+    }
+    return -1;
+  }
+  // Fallback ulteriore: prefix matching — cerca le prime K parole del needle
+  function findNormPrefix(normNeedle, K){
+    const nw = normNeedle.split(' ').filter(Boolean);
+    if(nw.length < 1) return -1;
+    const k = Math.min(K, nw.length);
+    return findNormSubseq(nw.slice(0, k).join(' '));
+  }
+
+  for(let pvIdx = 0; pvIdx < pvs.length; pvIdx++){
+    const p = normPv(pvs[pvIdx]);
+    let resolved = null;
+
+    // (1) start/end validi
+    if(p.start != null && p.end != null){
+      const s = Math.max(0, p.start - 1);
+      const e = Math.min(n - 1, p.end - 1);
+      if(s <= e && s < n) resolved = { s, e, source: 'index' };
+    }
+
+    // (2) substring esatto
+    if(!resolved && p.testo){
+      const t = p.testo.trim();
+      const idx = hay.indexOf(t);
+      if(idx !== -1){
+        const before = hay.slice(0, idx).split(/\s+/).filter(Boolean).length;
+        const span   = t.split(/\s+/).length;
+        const s = before;
+        const e = Math.min(n - 1, before + span - 1);
+        if(s <= e) resolved = { s, e, source: 'substring' };
+      }
+    }
+
+    // (3) fuzzy normalizzato
+    if(!resolved && p.testo){
+      const normNeedle = _normalizeForMatch(p.testo);
+      let s = findNormSubseq(normNeedle);
+      // fallback: prova le prime 10 parole
+      if(s === -1) s = findNormPrefix(normNeedle, 10);
+      // fallback ultimo: prime 5 parole
+      if(s === -1) s = findNormPrefix(normNeedle, 5);
+      if(s !== -1){
+        const span = normNeedle.split(' ').filter(Boolean).length;
+        const e = Math.min(n - 1, s + span - 1);
+        resolved = { s, e, source: 'fuzzy' };
+      }
+    }
+
+    out[pvIdx] = resolved;
+  }
+  return out;
+}
+
+function highlightText(text, pvs){
+  // Caso: nessun testo → mostra le evidence come sequenza di span
   if(!text){
-    if(evs.length){
-      return '<div style="color:var(--text3);font-size:9px;margin-bottom:8px;font-style:italic">Testo completo non disponibile — evidenze estratte:</div>\n'+
-        evs.map(ev=>{
-          const c=LCOL[ev.layer]||'#888';
-          const q=(ev.testo||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-          const m=(ev.motivo||'').replace(/"/g,'&quot;');
-          return `<span class="ev-s ev-${ev.layer}">${q}<span class="ev-tip"><strong style="color:${c}">${ev.layer}</strong> — ${m}</span></span>`;
-        }).join('\n\n');
+    if(pvs && pvs.length){
+      let out='<div style="color:var(--text3);font-size:9px;margin-bottom:10px;font-style:italic">Testo completo non disponibile — frasi classificate:</div>';
+      for(let pvIdx = 0; pvIdx < pvs.length; pvIdx++){
+        const p = normPv(pvs[pvIdx]);
+        if(!p.testo) continue;
+        const c   = LCOL[p.key] || '#888';
+        const tip = p.key ? `<span class="ev-tip"><strong style="color:${c}">${p.key}</strong>${p.reason?' — '+escHtml(p.reason):''}</span>` : '';
+        out += `<span class="ev-s ev-${p.key||''}" data-pv-idx="${pvIdx}">${escHtml(p.testo)}${tip}</span>\n\n`;
+      }
+      return out || '<span style="color:var(--text3);font-style:italic">Testo non disponibile</span>';
     }
     return '<span style="color:var(--text3);font-style:italic">Testo non disponibile</span>';
   }
-  let norm=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n')
-               .replace(/([^\n])\n([^\n])/g,'$1 $2')
-               .replace(/\n{3,}/g,'\n\n')
-               .trim();
-  let s=norm.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const parts=[];
-  for(const ev of evs){
-    const q=(ev.testo||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    if(!q)continue;
-    const idx=s.indexOf(q);
-    if(idx===-1)continue;
-    if(parts.some(p=>idx<p.e&&idx+q.length>p.s))continue;
-    parts.push({s:idx,e:idx+q.length,q,layer:ev.layer,m:(ev.motivo||'').replace(/"/g,'&quot;')});
+
+  // Caso: testo disponibile → marca i token e ricostruisci HTML
+  const words   = text.trim().split(/\s+/);
+  const n       = words.length;
+  const tkLv    = new Array(n).fill(null);
+  const tkR     = new Array(n).fill('');
+  const tkIdx   = new Array(n).fill(-1);
+  const ranges  = resolvePvRanges(text, pvs);
+
+  for(let pvIdx = 0; pvIdx < (pvs || []).length; pvIdx++){
+    const r = ranges[pvIdx];
+    if(!r) continue;
+    const p = normPv(pvs[pvIdx]);
+    if(!LCOL[p.key]) continue;
+    for(let i = r.s; i <= r.e; i++){ tkLv[i] = p.key; tkR[i] = p.reason; tkIdx[i] = pvIdx; }
   }
-  parts.sort((a,b)=>a.s-b.s);
-  let out='',pos=0;
-  for(const p of parts){
-    out+=s.slice(pos,p.s);
-    const c=LCOL[p.layer]||'#888';
-    out+=`<span class="ev-s ev-${p.layer}">${p.q}<span class="ev-tip"><strong style="color:${c}">${p.layer}</strong> — ${p.m}</span></span>`;
-    pos=p.e;
+
+  let html = '', i = 0;
+  while(i < n){
+    const lv = tkLv[i];
+    if(!lv){ html += escHtml(words[i]) + ' '; i++; }
+    else{
+      let j = i;
+      while(j < n && tkLv[j] === lv && tkR[j] === tkR[i] && tkIdx[j] === tkIdx[i]) j++;
+      const c      = LCOL[lv];
+      const reason = tkR[i];
+      const pvi    = tkIdx[i];
+      const tip    = `<span class="ev-tip"><strong style="color:${c}">${lv}</strong>${reason?' — '+escHtml(reason):''}</span>`;
+      html += `<span class="ev-s ev-${lv}" data-pv-idx="${pvi}">${words.slice(i,j).map(escHtml).join(' ')} ${tip}</span>`;
+      i = j;
+    }
   }
-  return out+s.slice(pos);
+  return html;
 }
 
-function openArtPanel(artId,text,evidence,lamf){
-  console.log('lamf articolo:', artId, lamf);
-  const lamfBar=document.getElementById('ph-lamf-bar');
+function buildProvisionList(pvs, text){
+  if(!pvs || !pvs.length) return '';
+  const words      = text ? text.trim().split(/\s+/) : [];
+  const totalWords = words.length || 0;
+  const ranges     = resolvePvRanges(text, pvs); // single source of truth
+
+  // Normalizza preservando l'indice originale e il range risolto
+  const normalized = pvs.map((p, i) => ({
+    ...normPv(p),
+    _idx: i,
+    _range: ranges[i]   // {s,e,source} o null
+  }));
+
+  // Raggruppa per layer in ordine fisso L1→L4
+  const ORDER = ['L1','L2','L3','L4'];
+  const groups = {};
+  ORDER.forEach(k => { groups[k] = []; });
+  normalized.forEach(p => {
+    if(groups[p.key]) groups[p.key].push(p);
+    else if(groups['L1']) groups['L1'].push(p);
+  });
+
+  // Word count della singola provision: usa il range risolto se c'è,
+  // altrimenti la lunghezza del testo della provision (best-effort, no anchor).
+  function pvWordCount(p){
+    if(p._range) return p._range.e - p._range.s + 1;
+    if(p.testo)  return p.testo.trim().split(/\s+/).length;
+    return 0;
+  }
+
+  // Word count del gruppo: parole UNIQUE coperte dai range risolti.
+  // Provisions senza range non contribuiscono al %.
+  function groupUniqueWords(grp){
+    if(!totalWords) return 0;
+    const covered = new Set();
+    for(const p of grp){
+      if(!p._range) continue;
+      for(let i = p._range.s; i <= p._range.e; i++) covered.add(i);
+    }
+    return covered.size;
+  }
+
+  // Snippet: preferisce il `testo` originale (più affidabile e leggibile),
+  // altrimenti estrae 15 parole dal range risolto.
+  function pvSnippet(p){
+    if(p.testo){
+      const tw = p.testo.trim().split(/\s+/);
+      return tw.slice(0, 15).map(escHtml).join(' ') + (tw.length > 15 ? '&hellip;' : '');
+    }
+    if(p._range && words.length){
+      const s = p._range.s, e = p._range.e;
+      return words.slice(s, Math.min(e+1, s+15)).map(escHtml).join(' ') + (e-s >= 15 ? '&hellip;' : '');
+    }
+    return '';
+  }
+
+  // Banner se ci sono provisions non localizzate (opzionale, informativo)
+  const totalUnresolved = normalized.filter(p => !p._range && (text && text.length)).length;
+  let html = '<div class="pv-list"><div class="pv-list-title">PROVISIONS</div>';
+  if(totalUnresolved > 0){
+    html += `<div class="pv-warn" title="Queste frasi non sono state localizzate nel testo dell'articolo (probabilmente per discrepanze di formattazione). Vengono mostrate ma non sono cliccabili per scrollare al testo.">⚠ ${totalUnresolved} provision${totalUnresolved>1?'s':''} non ${totalUnresolved>1?'localizzate':'localizzata'} nel testo</div>`;
+  }
+
+  ORDER.forEach(key => {
+    const grp = groups[key];
+    if(!grp || !grp.length) return;
+    const c        = LCOL[key] || '#5a6a8a';
+    const grpWords = groupUniqueWords(grp);
+    const grpPct   = totalWords > 0 ? Math.min(100, Math.round((grpWords / totalWords) * 100)) : null;
+    const pctLabel = (grpPct != null) ? ` · ${grpPct}% del testo` : '';
+    html += `<div class="pv-group-hdr" style="color:${c}">
+      <span class="pv-group-key">${key}</span>
+      <span class="pv-group-meta">· ${grp.length} provision${grp.length>1?'s':''}${pctLabel}</span>
+    </div>`;
+    grp.forEach(p => {
+      const snippet  = pvSnippet(p);
+      const wc       = pvWordCount(p);
+      const wcLabel  = wc > 0 ? `<span class="pv-wc">· ${wc} parole</span>` : '';
+      const noAnchor = !p._range && text && text.length;
+      const cls      = noAnchor ? 'pv-row pv-no-anchor' : 'pv-row';
+      const titleAtt = noAnchor ? ' title="Frase non localizzata nel testo dell\'articolo"' : '';
+      html += `<div class="${cls}" data-pv-idx="${p._idx}" style="border-left:3px solid ${c}"${titleAtt}>
+        <span class="pv-content">
+          <span class="pv-reason">${escHtml(p.reason || '—')}${noAnchor ? ' <span class="pv-noanchor-tag">⚠</span>' : ''}</span>
+          ${snippet ? `<span class="pv-excerpt">${snippet}${wcLabel}</span>` : ''}
+        </span>
+      </div>`;
+    });
+  });
+
+  return html + '</div>';
+}
+
+// ── Provision ↔ Text hover sync (registrato a DOM-ready) ────────────────────
+document.addEventListener('DOMContentLoaded', function initPvSync(){
+  const pvList = document.getElementById('ap-pvlist');
+  const apBody = document.getElementById('ap-body');
+  if(!pvList || !apBody) return;
+
+  // Lista → Testo: hover su .pv-row evidenzia gli span con stesso data-pv-idx
+  pvList.addEventListener('mouseover', e => {
+    const row = e.target.closest('.pv-row');
+    if(!row) return;
+    const idx = row.dataset.pvIdx;
+    if(idx == null) return;
+    apBody.classList.add('has-active');
+    apBody.querySelectorAll('.ev-s').forEach(span => {
+      span.classList.toggle('pv-active', span.dataset.pvIdx === idx);
+    });
+    row.classList.add('pv-row-hover');
+  });
+
+  pvList.addEventListener('mouseout', e => {
+    const row = e.target.closest('.pv-row');
+    if(!row) return;
+    apBody.classList.remove('has-active');
+    apBody.querySelectorAll('.ev-s').forEach(span => span.classList.remove('pv-active'));
+    row.classList.remove('pv-row-hover');
+  });
+
+  // Click su riga → scroll smooth allo span corrispondente; flash se non ancorata
+  pvList.addEventListener('click', e => {
+    const row = e.target.closest('.pv-row');
+    if(!row) return;
+    const idx = row.dataset.pvIdx;
+    if(idx == null) return;
+    const target = apBody.querySelector(`.ev-s[data-pv-idx="${idx}"]`);
+    if(target){
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Flash visivo per dare feedback anche quando il target è già visibile
+      target.classList.add('pv-flash');
+      setTimeout(() => target.classList.remove('pv-flash'), 900);
+    } else {
+      // Provision non localizzata nel testo: feedback sulla riga stessa
+      row.classList.add('pv-flash-row');
+      setTimeout(() => row.classList.remove('pv-flash-row'), 600);
+    }
+  });
+
+  // Testo → Lista: hover su .ev-s evidenzia la riga corrispondente
+  apBody.addEventListener('mouseover', e => {
+    const span = e.target.closest('.ev-s');
+    if(!span) return;
+    const idx = span.dataset.pvIdx;
+    if(idx == null) return;
+    pvList.querySelectorAll('.pv-row').forEach(row => {
+      row.classList.toggle('pv-row-hover', row.dataset.pvIdx === idx);
+    });
+  });
+
+  apBody.addEventListener('mouseout', e => {
+    const span = e.target.closest('.ev-s');
+    if(!span) return;
+    pvList.querySelectorAll('.pv-row').forEach(row => row.classList.remove('pv-row-hover'));
+  });
+});
+
+
+function openArtPanel(artId, text, pvs, lamf){
+  // Aggiorna la barra distribuzione con i valori dell'articolo
   if(lamf && Object.keys(lamf).length){
-    lamfBar.style.display='block';
+    const lamfBar = document.getElementById('ph-lamf-bar');
+    lamfBar.style.display = 'block';
     ['L1','L2','L3','L4'].forEach(k=>{
-      const pct=lamf[k]||0;
-      document.getElementById('lbs-'+k).style.width=pct+'%';
-      document.getElementById('lpct-'+k).textContent=' '+Math.round(pct)+'%';
+      const pct = lamf[k] || 0;
+      document.getElementById('lbs-'+k).style.width = pct+'%';
+      document.getElementById('lpct-'+k).textContent = ' '+Math.round(pct)+'%';
     });
   }
-  document.getElementById('ap-id').textContent='Art. '+String(artId).replace(/^[a-zA-Z_]+/,'');
-  document.getElementById('ap-body').innerHTML=highlightText(text,evidence||[]);
-  document.getElementById('art-panel').style.display='block';
-  const hasEv=(evidence||[]).length>0;
-  document.getElementById('ap-hint').style.display=hasEv?'':'none';
+  document.getElementById('ap-id').textContent  = 'Art. ' + String(artId).replace(/^[a-zA-Z_]+/, '');
+  document.getElementById('ap-body').innerHTML   = highlightText(text, pvs || []);
+  document.getElementById('ap-pvlist').innerHTML = buildProvisionList(pvs || [], text || '');
+  document.getElementById('art-panel').style.display = 'block';
 }
 
 </script>
@@ -110,6 +392,20 @@ header{display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:
 .h-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--accent);background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.22);padding:2px 8px;border-radius:2px;text-transform:uppercase}
 header h1{font-size:12.5px;font-weight:500;letter-spacing:.02em}
 .h-right{margin-left:auto;font-size:10px;color:var(--text3);font-family:var(--mono)}
+/* H mode toggle */
+.h-toggle{display:flex;gap:0;border:1px solid var(--border2);border-radius:3px;overflow:hidden;background:var(--bg3);font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;margin-left:14px}
+.h-toggle button{background:none;border:none;color:var(--text3);padding:4px 10px;cursor:pointer;text-transform:uppercase;transition:background .12s,color .12s;font-family:inherit;font-size:inherit;letter-spacing:inherit}
+.h-toggle button:hover{color:var(--text)}
+.h-toggle button.active{background:rgba(79,142,247,.18);color:var(--accent2)}
+.h-toggle button + button{border-left:1px solid var(--border2)}
+/* Delta bar in panel */
+.h-trio{display:flex;gap:14px;margin-top:6px;font-family:var(--mono);font-size:10px;flex-wrap:wrap}
+.h-trio .h-cell{display:flex;flex-direction:column;gap:1px;padding:4px 9px;border-radius:3px;background:rgba(255,255,255,.025);border:1px solid var(--border)}
+.h-trio .h-cell .h-lbl{font-size:8.5px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase}
+.h-trio .h-cell .h-val{font-size:11.5px;font-weight:500}
+.h-cell.delta-pos{border-color:rgba(200,92,58,.35);background:rgba(200,92,58,.06)}
+.h-cell.delta-neg{border-color:rgba(58,156,110,.35);background:rgba(58,156,110,.06)}
+.lamf-bar-cap{font-size:8.5px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:4px}
 
 .main{display:flex;flex:1;overflow:hidden}
 #gp{flex:1;min-width:0;position:relative;overflow:hidden}
@@ -209,19 +505,50 @@ marker path{stroke:none}
 #hint.gone{opacity:0}
 
 /* ── Evidence text panel ── */
-#art-panel{display:none;flex-shrink:0;border-top:1px solid var(--border);background:var(--bg3);max-height:38%;overflow-y:auto}
+#art-panel{display:none;flex-shrink:0;border-top:1px solid var(--border);background:var(--bg3);max-height:50%;overflow-y:auto}
 .ap-hdr{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg3);z-index:1}
 .ap-id{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--accent2)}
 .ap-close{margin-left:auto;cursor:pointer;font-size:10px;color:var(--text3);font-family:var(--mono);padding:2px 6px;border:1px solid var(--border);border-radius:2px}
 .ap-close:hover{color:var(--text);border-color:var(--border2)}
-.ap-body{padding:12px 16px;font-family:var(--mono);font-size:10.5px;line-height:1.75;color:var(--text);white-space:pre-wrap;word-break:break-word}
+.ap-body{padding:12px 16px;font-family:var(--mono);font-size:10.5px;line-height:1.85;color:var(--text);white-space:pre-wrap;word-break:break-word;border-bottom:1px solid var(--border)}
+.ap-body:empty{display:none}
 .ev-s{border-radius:2px;padding:0 2px;cursor:help;position:relative;display:inline}
-.ev-L1{background:rgba(79,142,247,.18);border-bottom:2px solid #4f8ef7}
-.ev-L2{background:rgba(176,144,224,.18);border-bottom:2px solid #b090e0}
-.ev-L3{background:rgba(58,156,110,.18);border-bottom:2px solid #3a9c6e}
-.ev-L4{background:rgba(200,92,58,.18);border-bottom:2px solid #c85c3a}
-.ev-tip{display:none;position:absolute;bottom:calc(100% + 5px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:7px 10px;font-size:9px;color:var(--text);width:230px;z-index:300;line-height:1.45;pointer-events:none;white-space:normal}
+.ev-L1{background:rgba(79,142,247,.15);border-bottom:2px solid #4f8ef7}
+.ev-L2{background:rgba(176,144,224,.15);border-bottom:2px solid #b090e0}
+.ev-L3{background:rgba(58,156,110,.15);border-bottom:2px solid #3a9c6e}
+.ev-L4{background:rgba(200,92,58,.15);border-bottom:2px solid #c85c3a}
+.ev-tip{display:none;position:absolute;bottom:calc(100% + 6px);left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:7px 11px;font-size:9.5px;color:var(--text);width:260px;z-index:300;line-height:1.5;pointer-events:none;white-space:normal;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 .ev-s:hover .ev-tip{display:block}
+/* ── Provision list ── */
+.pv-list{padding:10px 16px 14px}
+.pv-list-title{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+/* Group header — label colorata + count + % del testo */
+.pv-group-hdr{display:flex;align-items:baseline;gap:0;padding:7px 0 4px;margin-top:8px;font-family:var(--mono);font-size:9px;letter-spacing:.09em;text-transform:uppercase;border-bottom:1px solid currentColor;opacity:.85}
+.pv-group-hdr:first-of-type{margin-top:0}
+.pv-group-key{font-weight:700;font-size:10px}
+.pv-group-meta{font-weight:400;opacity:.7;margin-left:4px}
+/* Row con left-border colorato (sostituisce il vecchio badge) */
+.pv-row{display:flex;align-items:baseline;gap:0;padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.035);cursor:pointer;transition:background .12s}
+.pv-row:last-child{border-bottom:none}
+.pv-row:hover,.pv-row.pv-row-hover{background:rgba(255,255,255,.05)}
+.pv-content{display:flex;flex-direction:column;gap:2px;min-width:0;width:100%}
+.pv-reason{font-family:var(--sans);font-size:10.5px;color:var(--text);line-height:1.4}
+.pv-excerpt{font-family:var(--mono);font-size:9px;color:var(--text3);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-wc{font-size:8.5px;color:var(--text3);margin-left:6px;opacity:.7}
+/* Sync hover: span attivo "si accende", gli altri sfumano */
+.ap-body .ev-s{transition:opacity .15s,filter .15s}
+.ev-s.pv-active{outline:1.5px solid currentColor;outline-offset:1px;filter:brightness(1.35) saturate(1.25);opacity:1!important;z-index:2}
+.ap-body.has-active .ev-s:not(.pv-active){opacity:.32}
+/* Flash dopo click — feedback anche se il target è già visibile */
+@keyframes pvFlash{0%{outline-width:1.5px;outline-color:transparent;filter:brightness(1)}30%{outline-width:3px;outline-color:#fff;filter:brightness(1.6) saturate(1.4)}100%{outline-width:1.5px;outline-color:transparent;filter:brightness(1)}}
+.ev-s.pv-flash{outline:1.5px solid currentColor;animation:pvFlash .9s ease-out}
+@keyframes pvFlashRow{0%,100%{background:transparent}50%{background:rgba(200,92,58,.18)}}
+.pv-row.pv-flash-row{animation:pvFlashRow .6s ease-in-out}
+/* Provision non localizzata nel testo */
+.pv-row.pv-no-anchor{cursor:not-allowed;opacity:.72}
+.pv-row.pv-no-anchor:hover{background:rgba(200,92,58,.06)}
+.pv-noanchor-tag{color:#c85c3a;font-size:9px;margin-left:4px;font-family:var(--mono);opacity:.75}
+.pv-warn{font-family:var(--mono);font-size:9px;color:#d4a838;background:rgba(212,168,56,.07);border:1px solid rgba(212,168,56,.25);border-radius:3px;padding:5px 9px;margin-bottom:8px;cursor:help;letter-spacing:.04em}
 .hm-row-hl{cursor:pointer}
 .hm-row-hl:hover rect.row-bg{fill:rgba(255,255,255,.05)!important}
 /* ── Lamfalussy distribution bar ── */
@@ -236,6 +563,10 @@ marker path{stroke:none}
 <header>
   <div class="h-tag">Prototype v0.5</div>
   <h1>Appalti Pubblici — Rete Normativa IT+EU</h1>
+  <div class="h-toggle" title="Modalità di colorazione: H_local = entropia interna · H_global = entropia diffusa via citazioni (λ=0.5)">
+    <button id="ht-loc"  class="active">H local</button>
+    <button id="ht-glob">H global</button>
+  </div>
   <div class="h-right" id="h-count">21 atti · 4 livelli Lamfalussy · 5 tipi di arco</div>
 </header>
 <div class="main">
@@ -245,7 +576,7 @@ marker path{stroke:none}
 
     <!-- Node legend -->
     <div id="gl-hybrid">
-    <div class="glti">Hybridity Score (H)</div>
+    <div class="glti">Hybridity Score (H) <span id="gl-hmode" style="color:var(--accent2);text-transform:none;letter-spacing:0">· local</span></div>
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
       <span style="font-size:9px;color:var(--text3);width:8px;text-align:right">0</span>
       <canvas id="gl-hyb-bar" width="120" height="10" style="border-radius:2px;display:block"></canvas>
@@ -310,7 +641,21 @@ marker path{stroke:none}
           <span>Articles: <span id="ph-n">—</span></span>
           <span>Layer dom.: <span id="ph-dom">—</span></span>
         </div>
+        <!-- Trio H_local / H_global / Δ -->
+        <div class="h-trio" id="h-trio" style="display:none">
+          <div class="h-cell" title="Entropia di Shannon sui 4 livelli Lamfalussy — solo distribuzione interna dell'atto">
+            <span class="h-lbl">H local</span><span class="h-val" id="ht-loc-val">—</span>
+          </div>
+          <div class="h-cell" title="Entropia post-diffusione: include la complessità ereditata via citazioni (λ=0.5, Bellomarini et al.)">
+            <span class="h-lbl">H global</span><span class="h-val" id="ht-glob-val">—</span>
+          </div>
+          <div class="h-cell" id="ht-delta-cell" title="Δ = H_global − H_local. Δ>0 = atto contaminato dall'ecosistema citato. Δ<0 = atto cita materiale più ordinato di sé">
+            <span class="h-lbl">Δ contamination</span><span class="h-val" id="ht-delta-val">—</span>
+          </div>
+        </div>
+        <!-- Barra distribuzione locale -->
         <div class="lamf-bar" id="ph-lamf-bar" style="display:none">
+          <div class="lamf-bar-cap">local distribution (articles)</div>
           <div class="lamf-bar-track">
             <div class="lamf-seg" id="lbs-L1" style="background:#4f8ef7"></div>
             <div class="lamf-seg" id="lbs-L2" style="background:#b090e0"></div>
@@ -322,6 +667,22 @@ marker path{stroke:none}
             <span style="color:#b090e0">L2<span class="lamf-lbl-pct" id="lpct-L2"> —</span></span>
             <span style="color:#3a9c6e">L3<span class="lamf-lbl-pct" id="lpct-L3"> —</span></span>
             <span style="color:#c85c3a">L4<span class="lamf-lbl-pct" id="lpct-L4"> —</span></span>
+          </div>
+        </div>
+        <!-- Barra distribuzione globale (post-diffusione) -->
+        <div class="lamf-bar" id="ph-lamf-bar-glob" style="display:none">
+          <div class="lamf-bar-cap">global distribution (post-diffusion, λ=0.5)</div>
+          <div class="lamf-bar-track">
+            <div class="lamf-seg" id="lbsg-L1" style="background:#4f8ef7"></div>
+            <div class="lamf-seg" id="lbsg-L2" style="background:#b090e0"></div>
+            <div class="lamf-seg" id="lbsg-L3" style="background:#3a9c6e"></div>
+            <div class="lamf-seg" id="lbsg-L4" style="background:#c85c3a"></div>
+          </div>
+          <div class="lamf-lbls">
+            <span style="color:#4f8ef7">L1<span class="lamf-lbl-pct" id="lpctg-L1"> —</span></span>
+            <span style="color:#b090e0">L2<span class="lamf-lbl-pct" id="lpctg-L2"> —</span></span>
+            <span style="color:#3a9c6e">L3<span class="lamf-lbl-pct" id="lpctg-L3"> —</span></span>
+            <span style="color:#c85c3a">L4<span class="lamf-lbl-pct" id="lpctg-L4"> —</span></span>
           </div>
         </div>
         <div class="lamf-bar" id="ph-layers-bar" style="display:none">
@@ -347,16 +708,16 @@ marker path{stroke:none}
       <div id="art-panel">
         <div class="ap-hdr">
           <span class="ap-id" id="ap-id">—</span>
-          <span style="font-size:9px;color:var(--text3);font-family:var(--mono)" id="ap-hint">click a highlighted phrase for explanation</span>
           <span class="ap-close" onclick="closeArtPanel()">✕ close</span>
         </div>
         <div class="ap-body" id="ap-body"></div>
+        <div id="ap-pvlist"></div>
       </div>
   </div>
 </div>
 
 <script>
-const NODES  = [{"id": "l_108_2021", "H": 0.613, "n": 1, "dom": "Level 4 — Enforcement", "dominant_lamf": "L4", "title": "l_108_2021", "heatmap": "computed", "lamf": {"L1": 31.6, "L2": 7.0, "L3": 0.0, "L4": 61.4}}, {"id": "l_190_2012", "H": 0.607, "n": 2, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_190_2012", "heatmap": "computed", "lamf": {"L1": 36.8, "L2": 53.0, "L3": 0.0, "L4": 10.2}}, {"id": "dl_135_2018", "H": 0.331, "n": 12, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dl_135_2018", "heatmap": "computed", "lamf": {"L1": 35.7, "L2": 64.3, "L3": 0.0, "L4": 0.0}}, {"id": "l_241_1990", "H": 0.26, "n": 31, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_241_1990", "heatmap": "computed", "lamf": {"L1": 54.6, "L2": 38.5, "L3": 0.1, "L4": 6.9}}, {"id": "dlgs_228_2011", "H": 0.252, "n": 11, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_228_2011", "heatmap": "computed", "lamf": {"L1": 46.4, "L2": 41.5, "L3": 0.0, "L4": 12.1}}, {"id": "dlgs_33_2013", "H": 0.24, "n": 53, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_33_2013", "heatmap": "computed", "lamf": {"L1": 36.1, "L2": 53.3, "L3": 0.3, "L4": 10.3}}, {"id": "dlgs_36_2023", "H": 0.219, "n": 229, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_36_2023", "heatmap": "computed", "lamf": {"L1": 28.7, "L2": 64.2, "L3": 0.1, "L4": 7.0}}, {"id": "dl_13_2023", "H": 0.214, "n": 58, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dl_13_2023", "heatmap": "computed", "lamf": {"L1": 29.2, "L2": 66.6, "L3": 0.0, "L4": 4.1}}, {"id": "l_145_2018", "H": 0.184, "n": 19, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "l_145_2018", "heatmap": "computed", "lamf": {"L1": 46.7, "L2": 49.2, "L3": 0.0, "L4": 4.1}}, {"id": "l_90_2024", "H": 0.172, "n": 24, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "l_90_2024", "heatmap": "computed", "lamf": {"L1": 37.7, "L2": 47.5, "L3": 0.0, "L4": 14.8}}, {"id": "dlgs_59_2010", "H": 0.169, "n": 86, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_59_2010", "heatmap": "computed", "lamf": {"L1": 44.5, "L2": 42.0, "L3": 0.9, "L4": 12.6}}, {"id": "dlgs_97_2016", "H": 0.118, "n": 44, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_97_2016", "heatmap": "computed", "lamf": {"L1": 28.1, "L2": 67.0, "L3": 0.0, "L4": 4.9}}, {"id": "dlgs_229_2011", "H": 0.11, "n": 12, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_229_2011", "heatmap": "computed", "lamf": {"L1": 19.3, "L2": 69.9, "L3": 8.3, "L4": 2.4}}, {"id": "dlgs_209_2024", "H": 0.103, "n": 97, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_209_2024", "heatmap": "computed", "lamf": {"L1": 24.7, "L2": 72.0, "L3": 0.0, "L4": 3.3}}, {"id": "l_136_2010", "H": 0.091, "n": 16, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "l_136_2010", "heatmap": "computed", "lamf": {"L1": 33.5, "L2": 59.8, "L3": 0.0, "L4": 6.7}}, {"id": "dlgs_56_2017", "H": 0.081, "n": 131, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_56_2017", "heatmap": "computed", "lamf": {"L1": 7.9, "L2": 88.3, "L3": 0.3, "L4": 3.5}}, {"id": "dlgs_218_2012", "H": 0.071, "n": 10, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_218_2012", "heatmap": "computed", "lamf": {"L1": 30.9, "L2": 64.2, "L3": 0.0, "L4": 4.9}}, {"id": "dpr_207_2010", "H": 0.058, "n": 334, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dpr_207_2010", "heatmap": "computed", "lamf": {"L1": 70.2, "L2": 20.4, "L3": 2.1, "L4": 7.3}}, {"id": "dlgs_50_2016", "H": 0.047, "n": 220, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dlgs_50_2016", "heatmap": "computed", "lamf": {"L1": 95.4, "L2": 4.1, "L3": 0.0, "L4": 0.4}}, {"id": "dlgs_163_2006", "H": 0.007, "n": 174, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dlgs_163_2006", "heatmap": "computed", "lamf": {"L1": 75.5, "L2": 0.4, "L3": 23.7, "L4": 0.5}}, {"id": "dm_154_2017", "H": 0.0, "n": 14, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dm_154_2017", "heatmap": "computed", "lamf": {"L1": 85.7, "L2": 0.0, "L3": 14.3, "L4": 0.0}}, {"id": "l_120_2020", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_120_2020", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_11_2016", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_11_2016", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_114_2014", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_114_2014", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_105_2025", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_105_2025", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_55_2019", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_55_2019", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_56_2024", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_56_2024", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_78_2022", "H": 0.0, "n": 2, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_78_2022", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_98_2013", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_98_2013", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "32014L0024", "H": 0.637, "n": 94, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "DIRETTIVA 2014/24/UE DEL PARLAMENTO EUROPEO E DEL CONSIGLIO del 26 febbraio 2014 sugli appalti pubblici e che abroga la ", "heatmap": "computed", "lamf": {"L1": 31.6, "L2": 60.3, "L3": 0.3, "L4": 7.8}, "eu": true}, {"id": "32014L0025", "H": 0.612, "n": 110, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "DIRETTIVA 2014/25/UE DEL PARLAMENTO EUROPEO E DEL CONSIGLIO del 26 febbraio 2014 sulle procedure d’appalto degli enti er", "heatmap": "computed", "lamf": {"L1": 34.7, "L2": 59.6, "L3": 0.2, "L4": 5.6}, "eu": true}, {"id": "32014L0023", "H": 0.666, "n": 55, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "DIRETTIVA 2014/23/UE DEL PARLAMENTO EUROPEO E DEL CONSIGLIO del 26 febbraio 2014 sull’aggiudicazione dei contratti di co", "heatmap": "computed", "lamf": {"L1": 42.3, "L2": 50.0, "L3": 0.3, "L4": 7.4}, "eu": true}];
+const NODES  = [{"id": "l_108_2021", "H": 0.613, "n": 1, "dom": "Level 4 — Enforcement", "dominant_lamf": "L4", "title": "l_108_2021", "heatmap": "computed", "lamf": {"L1": 31.6, "L2": 7.0, "L3": 0.0, "L4": 61.4}, "H_local": 0.613, "H_global": 0.826, "H_delta": 0.213, "lamf_loc": {"L1": 31.6, "L2": 7.0, "L3": 0.0, "L4": 61.4}, "lamf_glob": {"L1": 41.3, "L2": 14.7, "L3": 4.1, "L4": 39.8}}, {"id": "l_190_2012", "H": 0.607, "n": 2, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_190_2012", "heatmap": "computed", "lamf": {"L1": 36.8, "L2": 53.0, "L3": 0.0, "L4": 10.2}, "H_local": 0.676, "H_global": 0.727, "H_delta": 0.051, "lamf_loc": {"L1": 36.8, "L2": 53.0, "L3": 0.0, "L4": 10.2}, "lamf_glob": {"L1": 44.5, "L2": 45.0, "L3": 2.0, "L4": 8.6}}, {"id": "dl_135_2018", "H": 0.331, "n": 12, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dl_135_2018", "heatmap": "computed", "lamf": {"L1": 35.7, "L2": 64.3, "L3": 0.0, "L4": 0.0}, "H_local": 0.47, "H_global": 0.555, "H_delta": 0.085, "lamf_loc": {"L1": 35.7, "L2": 64.3, "L3": 0.0, "L4": 0.0}, "lamf_glob": {"L1": 46.1, "L2": 52.2, "L3": 0.0, "L4": 1.7}}, {"id": "l_241_1990", "H": 0.26, "n": 31, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_241_1990", "heatmap": "computed", "lamf": {"L1": 54.6, "L2": 38.5, "L3": 0.1, "L4": 6.9}, "H_local": 0.642, "H_global": 0.642, "H_delta": 0.0, "lamf_loc": {"L1": 54.5, "L2": 38.5, "L3": 0.1, "L4": 6.9}, "lamf_glob": {"L1": 54.5, "L2": 38.5, "L3": 0.1, "L4": 6.9}}, {"id": "dlgs_228_2011", "H": 0.252, "n": 11, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_228_2011", "heatmap": "computed", "lamf": {"L1": 46.4, "L2": 41.5, "L3": 0.0, "L4": 12.1}, "H_local": 0.705, "H_global": 0.773, "H_delta": 0.069, "lamf_loc": {"L1": 46.4, "L2": 41.5, "L3": 0.0, "L4": 12.1}, "lamf_glob": {"L1": 56.4, "L2": 28.3, "L3": 6.8, "L4": 8.5}}, {"id": "dlgs_33_2013", "H": 0.24, "n": 53, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_33_2013", "heatmap": "computed", "lamf": {"L1": 36.1, "L2": 53.3, "L3": 0.3, "L4": 10.3}, "H_local": 0.689, "H_global": 0.737, "H_delta": 0.048, "lamf_loc": {"L1": 36.1, "L2": 53.3, "L3": 0.3, "L4": 10.3}, "lamf_glob": {"L1": 39.1, "L2": 49.8, "L3": 2.8, "L4": 8.4}}, {"id": "dlgs_36_2023", "H": 0.219, "n": 229, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_36_2023", "heatmap": "computed", "lamf": {"L1": 28.7, "L2": 64.2, "L3": 0.1, "L4": 7.0}, "H_local": 0.603, "H_global": 0.696, "H_delta": 0.093, "lamf_loc": {"L1": 28.7, "L2": 64.2, "L3": 0.1, "L4": 7.0}, "lamf_glob": {"L1": 40.6, "L2": 51.0, "L3": 2.1, "L4": 6.3}}, {"id": "dl_13_2023", "H": 0.214, "n": 58, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dl_13_2023", "heatmap": "computed", "lamf": {"L1": 29.2, "L2": 66.6, "L3": 0.0, "L4": 4.1}, "H_local": 0.549, "H_global": 0.67, "H_delta": 0.121, "lamf_loc": {"L1": 29.2, "L2": 66.7, "L3": 0.0, "L4": 4.1}, "lamf_glob": {"L1": 42.3, "L2": 50.7, "L3": 1.3, "L4": 5.7}}, {"id": "l_145_2018", "H": 0.184, "n": 19, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "l_145_2018", "heatmap": "computed", "lamf": {"L1": 46.7, "L2": 49.2, "L3": 0.0, "L4": 4.1}, "H_local": 0.603, "H_global": 0.62, "H_delta": 0.017, "lamf_loc": {"L1": 46.7, "L2": 49.2, "L3": 0.0, "L4": 4.1}, "lamf_glob": {"L1": 49.3, "L2": 45.6, "L3": 0.0, "L4": 5.0}}, {"id": "l_90_2024", "H": 0.172, "n": 24, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "l_90_2024", "heatmap": "computed", "lamf": {"L1": 37.7, "L2": 47.5, "L3": 0.0, "L4": 14.8}, "H_local": 0.724, "H_global": 0.729, "H_delta": 0.005, "lamf_loc": {"L1": 37.7, "L2": 47.5, "L3": 0.0, "L4": 14.8}, "lamf_glob": {"L1": 39.8, "L2": 47.8, "L3": 0.9, "L4": 11.5}}, {"id": "dlgs_59_2010", "H": 0.169, "n": 86, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_59_2010", "heatmap": "computed", "lamf": {"L1": 44.5, "L2": 42.0, "L3": 0.9, "L4": 12.6}, "H_local": 0.742, "H_global": 0.776, "H_delta": 0.034, "lamf_loc": {"L1": 44.5, "L2": 42.0, "L3": 0.9, "L4": 12.6}, "lamf_glob": {"L1": 51.3, "L2": 34.5, "L3": 4.6, "L4": 9.6}}, {"id": "dlgs_97_2016", "H": 0.118, "n": 44, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_97_2016", "heatmap": "computed", "lamf": {"L1": 28.1, "L2": 67.0, "L3": 0.0, "L4": 4.9}, "H_local": 0.557, "H_global": 0.665, "H_delta": 0.108, "lamf_loc": {"L1": 28.1, "L2": 67.0, "L3": 0.0, "L4": 4.9}, "lamf_glob": {"L1": 37.0, "L2": 55.8, "L3": 1.7, "L4": 5.5}}, {"id": "dlgs_229_2011", "H": 0.11, "n": 12, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_229_2011", "heatmap": "computed", "lamf": {"L1": 19.3, "L2": 69.9, "L3": 8.3, "L4": 2.4}, "H_local": 0.623, "H_global": 0.737, "H_delta": 0.114, "lamf_loc": {"L1": 19.3, "L2": 70.0, "L3": 8.3, "L4": 2.4}, "lamf_glob": {"L1": 32.9, "L2": 54.8, "L3": 9.3, "L4": 3.0}}, {"id": "dlgs_209_2024", "H": 0.103, "n": 97, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_209_2024", "heatmap": "computed", "lamf": {"L1": 24.7, "L2": 72.0, "L3": 0.0, "L4": 3.3}, "H_local": 0.501, "H_global": 0.629, "H_delta": 0.128, "lamf_loc": {"L1": 24.7, "L2": 72.0, "L3": 0.0, "L4": 3.3}, "lamf_glob": {"L1": 38.5, "L2": 56.5, "L3": 1.4, "L4": 3.6}}, {"id": "l_136_2010", "H": 0.091, "n": 16, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "l_136_2010", "heatmap": "computed", "lamf": {"L1": 33.5, "L2": 59.8, "L3": 0.0, "L4": 6.7}, "H_local": 0.617, "H_global": 0.767, "H_delta": 0.15, "lamf_loc": {"L1": 33.5, "L2": 59.8, "L3": 0.0, "L4": 6.7}, "lamf_glob": {"L1": 47.5, "L2": 40.0, "L3": 7.9, "L4": 4.6}}, {"id": "dlgs_56_2017", "H": 0.081, "n": 131, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_56_2017", "heatmap": "computed", "lamf": {"L1": 7.9, "L2": 88.3, "L3": 0.3, "L4": 3.5}, "H_local": 0.321, "H_global": 0.633, "H_delta": 0.312, "lamf_loc": {"L1": 7.9, "L2": 88.3, "L3": 0.3, "L4": 3.5}, "lamf_glob": {"L1": 30.7, "L2": 62.8, "L3": 2.8, "L4": 3.7}}, {"id": "dlgs_218_2012", "H": 0.071, "n": 10, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "dlgs_218_2012", "heatmap": "computed", "lamf": {"L1": 30.9, "L2": 64.2, "L3": 0.0, "L4": 4.9}, "H_local": 0.574, "H_global": 0.729, "H_delta": 0.155, "lamf_loc": {"L1": 30.9, "L2": 64.2, "L3": 0.0, "L4": 4.9}, "lamf_glob": {"L1": 42.1, "L2": 48.2, "L3": 5.4, "L4": 4.4}}, {"id": "dpr_207_2010", "H": 0.058, "n": 334, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dpr_207_2010", "heatmap": "computed", "lamf": {"L1": 70.2, "L2": 20.4, "L3": 2.1, "L4": 7.3}, "H_local": 0.609, "H_global": 0.635, "H_delta": 0.026, "lamf_loc": {"L1": 70.2, "L2": 20.4, "L3": 2.1, "L4": 7.3}, "lamf_glob": {"L1": 71.9, "L2": 13.7, "L3": 9.3, "L4": 5.0}}, {"id": "dlgs_50_2016", "H": 0.047, "n": 220, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dlgs_50_2016", "heatmap": "computed", "lamf": {"L1": 95.4, "L2": 4.1, "L3": 0.0, "L4": 0.4}, "H_local": 0.142, "H_global": 0.463, "H_delta": 0.321, "lamf_loc": {"L1": 95.5, "L2": 4.1, "L3": 0.0, "L4": 0.4}, "lamf_glob": {"L1": 75.7, "L2": 21.6, "L3": 0.1, "L4": 2.6}}, {"id": "dlgs_163_2006", "H": 0.007, "n": 174, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dlgs_163_2006", "heatmap": "computed", "lamf": {"L1": 75.5, "L2": 0.4, "L3": 23.7, "L4": 0.5}, "H_local": 0.435, "H_global": 0.435, "H_delta": 0.0, "lamf_loc": {"L1": 75.4, "L2": 0.4, "L3": 23.7, "L4": 0.5}, "lamf_glob": {"L1": 75.4, "L2": 0.4, "L3": 23.7, "L4": 0.5}}, {"id": "dm_154_2017", "H": 0.0, "n": 14, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "dm_154_2017", "heatmap": "computed", "lamf": {"L1": 85.7, "L2": 0.0, "L3": 14.3, "L4": 0.0}, "H_local": 0.296, "H_global": 0.464, "H_delta": 0.168, "lamf_loc": {"L1": 85.7, "L2": 0.0, "L3": 14.3, "L4": 0.0}, "lamf_glob": {"L1": 81.4, "L2": 9.3, "L3": 8.2, "L4": 1.1}}, {"id": "l_120_2020", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_120_2020", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "H_local": 0.0, "H_global": 0.431, "H_delta": 0.431, "lamf_loc": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "lamf_glob": {"L1": 83.4, "L2": 10.4, "L3": 4.1, "L4": 2.1}}, {"id": "l_11_2016", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_11_2016", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "H_local": 0.0, "H_global": 0.396, "H_delta": 0.396, "lamf_loc": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "lamf_glob": {"L1": 85.9, "L2": 6.8, "L3": 5.2, "L4": 2.1}}, {"id": "l_114_2014", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_114_2014", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "H_local": 0.0, "H_global": 0.386, "H_delta": 0.386, "lamf_loc": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "lamf_glob": {"L1": 86.1, "L2": 7.2, "L3": 5.3, "L4": 1.5}}, {"id": "l_105_2025", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_105_2025", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "H_local": 0.0, "H_global": 0.0, "H_delta": 0.0, "lamf_loc": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "lamf_glob": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_55_2019", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_55_2019", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "H_local": 0.0, "H_global": 0.215, "H_delta": 0.215, "lamf_loc": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "lamf_glob": {"L1": 91.8, "L2": 0.1, "L3": 7.9, "L4": 0.2}}, {"id": "l_56_2024", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_56_2024", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "H_local": 0.0, "H_global": 0.0, "H_delta": 0.0, "lamf_loc": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "lamf_glob": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "l_78_2022", "H": 0.0, "n": 2, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_78_2022", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "H_local": 0.0, "H_global": 0.215, "H_delta": 0.215, "lamf_loc": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "lamf_glob": {"L1": 91.8, "L2": 0.1, "L3": 7.9, "L4": 0.2}}, {"id": "l_98_2013", "H": 0.0, "n": 1, "dom": "Level 1 — Framework principles", "dominant_lamf": "L1", "title": "l_98_2013", "heatmap": "computed", "lamf": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "H_local": 0.0, "H_global": 0.0, "H_delta": 0.0, "lamf_loc": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}, "lamf_glob": {"L1": 100.0, "L2": 0.0, "L3": 0.0, "L4": 0.0}}, {"id": "32014L0024", "H": 0.637, "n": 94, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "DIRETTIVA 2014/24/UE DEL PARLAMENTO EUROPEO E DEL CONSIGLIO del 26 febbraio 2014 sugli appalti pubblici e che abroga la ", "heatmap": "computed", "lamf": {"L1": 31.6, "L2": 60.3, "L3": 0.3, "L4": 7.8}, "eu": true, "H_local": 0.639, "H_global": 0.639, "H_delta": 0.0, "lamf_loc": {"L1": 31.6, "L2": 60.3, "L3": 0.3, "L4": 7.8}, "lamf_glob": {"L1": 31.6, "L2": 60.3, "L3": 0.3, "L4": 7.8}}, {"id": "32014L0025", "H": 0.612, "n": 110, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "DIRETTIVA 2014/25/UE DEL PARLAMENTO EUROPEO E DEL CONSIGLIO del 26 febbraio 2014 sulle procedure d’appalto degli enti er", "heatmap": "computed", "lamf": {"L1": 34.7, "L2": 59.6, "L3": 0.2, "L4": 5.6}, "eu": true, "H_local": 0.613, "H_global": 0.613, "H_delta": 0.0, "lamf_loc": {"L1": 34.7, "L2": 59.5, "L3": 0.2, "L4": 5.6}, "lamf_glob": {"L1": 34.7, "L2": 59.5, "L3": 0.2, "L4": 5.6}}, {"id": "32014L0023", "H": 0.666, "n": 55, "dom": "Level 2 — Operational rules", "dominant_lamf": "L2", "title": "DIRETTIVA 2014/23/UE DEL PARLAMENTO EUROPEO E DEL CONSIGLIO del 26 febbraio 2014 sull’aggiudicazione dei contratti di co", "heatmap": "computed", "lamf": {"L1": 42.3, "L2": 50.0, "L3": 0.3, "L4": 7.4}, "eu": true, "H_local": 0.664, "H_global": 0.664, "H_delta": 0.0, "lamf_loc": {"L1": 42.3, "L2": 50.0, "L3": 0.3, "L4": 7.4}, "lamf_glob": {"L1": 42.3, "L2": 50.0, "L3": 0.3, "L4": 7.4}}];
 const EDGES  = [{"s": "dlgs_36_2023", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dlgs_33_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "l_136_2010", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "l_114_2014", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dl_135_2018", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_36_2023", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dlgs_50_2016", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "l_78_2022", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "l_55_2019", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_36_2023", "t": "dlgs_228_2011", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "l_120_2020", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_36_2023", "t": "dlgs_229_2011", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_36_2023", "t": "l_108_2021", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dl_13_2023", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_36_2023", "t": "dpr_207_2010", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_209_2024", "t": "dlgs_36_2023", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_209_2024", "t": "l_241_1990", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_209_2024", "t": "dl_135_2018", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_209_2024", "t": "dlgs_50_2016", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_209_2024", "t": "dlgs_33_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_209_2024", "t": "l_120_2020", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_209_2024", "t": "l_136_2010", "type": "DEROGATES", "family": "proc", "w": 1}, {"s": "dlgs_56_2017", "t": "dlgs_50_2016", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_56_2017", "t": "l_11_2016", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_56_2017", "t": "dlgs_33_2013", "type": "REPEALS", "family": "mod", "w": 2}, {"s": "dlgs_56_2017", "t": "dlgs_229_2011", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_56_2017", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_56_2017", "t": "l_241_1990", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_56_2017", "t": "l_114_2014", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_56_2017", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_56_2017", "t": "l_98_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_11_2016", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dpr_207_2010", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_190_2012", "t": "l_241_1990", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "l_90_2024", "t": "dlgs_36_2023", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_136_2010", "t": "dlgs_163_2006", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_33_2013", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_33_2013", "t": "dlgs_229_2011", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_33_2013", "t": "dlgs_228_2011", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_33_2013", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_97_2016", "t": "dlgs_33_2013", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_97_2016", "t": "l_241_1990", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_97_2016", "t": "l_190_2012", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_97_2016", "t": "dlgs_50_2016", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_97_2016", "t": "dlgs_229_2011", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_97_2016", "t": "dlgs_228_2011", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_218_2012", "t": "l_136_2010", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_218_2012", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_228_2011", "t": "dlgs_163_2006", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_228_2011", "t": "dpr_207_2010", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_229_2011", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_229_2011", "t": "l_136_2010", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_59_2010", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_59_2010", "t": "dlgs_163_2006", "type": "DEROGATES", "family": "proc", "w": 1}, {"s": "dl_13_2023", "t": "l_108_2021", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_13_2023", "t": "l_55_2019", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dl_13_2023", "t": "dlgs_33_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_13_2023", "t": "l_145_2018", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_13_2023", "t": "dlgs_50_2016", "type": "DEROGATES", "family": "proc", "w": 1}, {"s": "dl_13_2023", "t": "l_241_1990", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dl_13_2023", "t": "l_120_2020", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_13_2023", "t": "dlgs_36_2023", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "l_145_2018", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_135_2018", "t": "l_145_2018", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dl_135_2018", "t": "dlgs_50_2016", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_209_2024", "t": "l_78_2022", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_209_2024", "t": "dlgs_36_2023", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_209_2024", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_11_2016", "t": "dlgs_228_2011", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_190_2012", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_190_2012", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_97_2016", "t": "l_241_1990", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_97_2016", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_97_2016", "t": "dlgs_33_2013", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_228_2011", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_229_2011", "t": "l_136_2010", "type": "CITES", "family": "ref", "w": 1}, {"s": "dl_135_2018", "t": "l_145_2018", "type": "CITES", "family": "ref", "w": 1}, {"s": "32014L0023", "t": "dlgs_36_2023", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0024", "t": "dlgs_36_2023", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0025", "t": "dlgs_36_2023", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0023", "t": "dlgs_50_2016", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0024", "t": "dlgs_50_2016", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "32014L0025", "t": "dlgs_50_2016", "type": "IMPLEMENTED_BY", "family": "recep", "w": 3}, {"s": "dlgs_218_2012", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "dlgs_56_2017", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "l_114_2014", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 2}, {"s": "l_55_2019", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 1}, {"s": "l_120_2020", "t": "dlgs_163_2006", "type": "AMENDS", "family": "mod", "w": 1}, {"s": "dlgs_36_2023", "t": "dlgs_163_2006", "type": "IMPLEMENTS", "family": "proc", "w": 1}, {"s": "l_108_2021", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_97_2016", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_114_2014", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dlgs_218_2012", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_78_2022", "t": "dlgs_163_2006", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_90_2024", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_120_2020", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "l_108_2021", "t": "l_190_2012", "type": "CITES", "family": "ref", "w": 1}, {"s": "dm_154_2017", "t": "dlgs_50_2016", "type": "BASED_ON", "family": "hier", "w": 2}, {"s": "dlgs_36_2023", "t": "dm_154_2017", "type": "REPEALS", "family": "mod", "w": 2}];
 // ── Aggiorna dom di ogni nodo dai dati reali della heatmap ──────────────────
 // dom statico in NODES è residuo del run precedente; questo lo sovrascrive
@@ -386,6 +747,9 @@ window.__onHeatmapsLoaded = function(data) {
     const pNorm_n = totals.map(v=>v/pSum_n);
     n.H = -pNorm_n.reduce((acc,p)=>acc+p*Math.log2(p+eps),0)/Math.log2(Math.max(totals.length,2));
     if (!isFinite(n.H) || n.H < 0) n.H = 0;
+    // Sincronizza H_local con il valore live; conserva H_global (calcolato dal notebook)
+    n.H_local = n.H;
+    if(n.H_global != null) n.H_delta = +(n.H_global - n.H_local).toFixed(3);
 
     // 4. Numero articoli reale
     n.n = arts.length;
@@ -426,15 +790,24 @@ window.__onHeatmapsLoaded = function(data) {
             .on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y})
             .on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}));
         ng.append('circle')
-          .attr('r',d=>nr(d.n)).attr('fill',d=>hcol(d.H)).attr('fill-opacity',.85)
-          .attr('stroke',d=>d.eu?'#aac8f0':hcol(d.H))
+          .attr('r',d=>nr(d.n)).attr('fill',d=>hcol(getH(d))).attr('fill-opacity',.85)
+          .attr('stroke',d=>d.eu?'#aac8f0':hcol(getH(d)))
           .attr('stroke-width',d=>d.eu?2:1).attr('stroke-opacity',.6)
           .attr('stroke-dasharray',d=>d.eu?'4,2':null);
         ng.append('text').attr('dy',d=>nr(d.n)+9).attr('text-anchor','middle').text(d=>d.id);
         ng.on('mouseover',(e,d)=>{
-          const sc=d.H>=.25?"#e07070":d.H>=.1?"#c9b840":"#58b872";
+          const Hv = getH(d);
+          const sc = Hv>=.25?"#e07070":Hv>=.1?"#c9b840":"#58b872";
+          const Hloc  = (d.H_local  != null ? d.H_local  : d.H || 0);
+          const Hglob = (d.H_global != null ? d.H_global : Hloc);
+          const dlt   = (d.H_delta  != null ? d.H_delta  : (Hglob - Hloc));
+          const dltCol = dlt > 0.05 ? '#e07070' : (dlt < -0.05 ? '#58b872' : 'var(--text2)');
+          const dltSign = dlt >= 0 ? '+' : '';
           tip.innerHTML=`<div class="ti">${d.id}</div><div class="tt">${d.title||d.id}</div>`+
-            `<div class="tr"><span>H</span><span class="tv" style="color:${sc}">${d.H.toFixed(3)}</span></div>`+
+            `<div class="tr"><span>H ${HMODE}</span><span class="tv" style="color:${sc}">${Hv.toFixed(3)}</span></div>`+
+            `<div class="tr"><span>H local</span><span class="tv">${Hloc.toFixed(3)}</span></div>`+
+            `<div class="tr"><span>H global</span><span class="tv">${Hglob.toFixed(3)}</span></div>`+
+            `<div class="tr"><span>Δ contam.</span><span class="tv" style="color:${dltCol}">${dltSign}${dlt.toFixed(3)}</span></div>`+
             `<div class="tr"><span>Articles</span><span class="tv">${d.n}</span></div>`+
             `<div class="tr"><span>Dom.</span><span class="tv">${d.dom}</span></div>`+
             `<div class="tc">↗ Click for heatmap</div>`;
@@ -461,7 +834,7 @@ window.__onHeatmapsLoaded = function(data) {
       });
     // Aggiorna colori su tutti i nodi (vecchi e nuovi)
     allNs.select('circle')
-      .attr('fill',d=>hcol(d.H)).attr('stroke',d=>d.eu?'#aac8f0':hcol(d.H)).attr('r',d=>nr(d.n));
+      .attr('fill',d=>hcol(getH(d))).attr('stroke',d=>d.eu?'#aac8f0':hcol(getH(d))).attr('r',d=>nr(d.n));
     // Aggiunge i nuovi nodi alla simulazione e riavvia
     sim.nodes(NODES);
     sim.force("collision").initialize(NODES);
@@ -531,6 +904,43 @@ function hcol(h){
 
 function nr(n){ return 4+Math.pow(n,.48)*1.1; }
 
+// ── H mode toggle (local vs global) ─────────────────────────────────────────
+// I nodi possono avere d.H_local e d.H_global (campi aggiunti dalla Fase E del
+// notebook). Per retrocompatibilità con file legacy, fallback a d.H.
+let HMODE = 'local';   // 'local' | 'global'
+function getH(d){
+  if(HMODE === 'global') return (d.H_global != null ? d.H_global : (d.H_local != null ? d.H_local : d.H || 0));
+  return (d.H_local != null ? d.H_local : d.H || 0);
+}
+function refreshNodeColors(){
+  if(typeof ns === 'undefined') return;
+  g.selectAll('g.node circle')
+    .transition().duration(220)
+    .attr('fill',   d => hcol(getH(d)))
+    .attr('stroke', d => d.eu ? '#aac8f0' : hcol(getH(d)));
+}
+// Bind toggle buttons
+(function bindHToggle(){
+  const bL = document.getElementById('ht-loc');
+  const bG = document.getElementById('ht-glob');
+  if(!bL || !bG) return;
+  function set(mode){
+    HMODE = mode;
+    bL.classList.toggle('active', mode === 'local');
+    bG.classList.toggle('active', mode === 'global');
+    const ind = document.getElementById('gl-hmode');
+    if(ind) ind.textContent = '· ' + mode;
+    refreshNodeColors();
+    // Se un nodo è aperto, ri-renderizza il pannello per aggiornare il badge H
+    if(typeof selId !== 'undefined' && selId){
+      const cur = NODES.find(n => n.id === selId);
+      if(cur && typeof openP === 'function') openP(cur);
+    }
+  }
+  bL.onclick = () => set('local');
+  bG.onclick = () => set('global');
+})();
+
 // ── SVG + Zoom ──────────────────────────────────────────────────────────────
 const svg = d3.select("#gs");
 const gp  = document.getElementById("gp");
@@ -583,9 +993,9 @@ const ns = g.append("g").selectAll("g.node").data(NODES).join("g").attr("class",
 
 ns.append("circle")
   .attr("r", d=>nr(d.n)) 
-  .attr("fill",   d=>hcol(d.H))
+  .attr("fill",   d=>hcol(getH(d)))
   .attr("fill-opacity", .85)
-  .attr("stroke", d=>d.eu ? "#aac8f0" : hcol(d.H))
+  .attr("stroke", d=>d.eu ? "#aac8f0" : hcol(getH(d)))
   .attr("stroke-width", d=>d.eu ? 2 : 1)
   .attr("stroke-opacity", .6)
   .attr("stroke-dasharray", d=>d.eu?"4,2":null);
@@ -608,14 +1018,20 @@ sim.on("tick",()=>{
 });
 
 // ── Edge family filter ──────────────────────────────────────────────────────
-const activeF = new Set(["ref","hier","mod","proc","temp"]);
+const activeF = new Set();
 function toggleFamily(fam){
   if(activeF.has(fam)) activeF.delete(fam); else activeF.add(fam);
-  document.querySelectorAll(`#gl-edges .glr`).forEach(el=>{
-    el.classList.toggle("faded", !activeF.has(el.dataset.family));
+  document.querySelectorAll('#gl-edges .glr').forEach(el=>{
+    el.classList.toggle('faded', activeF.size > 0 && !activeF.has(el.dataset.family));
   });
-  lnk.classed("dimmed", d=>!activeF.has(d.family))
-     .classed("active",  false);
+  if(activeF.size === 0){
+    lnk.classed('active', false).classed('dimmed', false);
+    lnk.style('opacity', d=>eo(d.w));
+  } else {
+    lnk.classed('active',  d=>activeF.has(d.family))
+       .classed('dimmed',  d=>!activeF.has(d.family));
+    lnk.style('opacity', null);
+  }
 }
 
 // ── Node + edge tooltips ────────────────────────────────────────────────────
@@ -623,10 +1039,19 @@ const tip = document.getElementById("tip");
 
 // Node hover
 ns.on("mouseover",(e,d)=>{
-  const sc=d.H>=.25?"#e07070":d.H>=.1?"#c9b840":"#58b872";
+  const Hv  = getH(d);
+  const sc  = Hv>=.25?"#e07070":Hv>=.1?"#c9b840":"#58b872";
+  const Hloc  = (d.H_local  != null ? d.H_local  : (d.H || 0));
+  const Hglob = (d.H_global != null ? d.H_global : Hloc);
+  const dlt   = (d.H_delta  != null ? d.H_delta  : (Hglob - Hloc));
+  const dltCol = dlt > 0.05 ? '#e07070' : (dlt < -0.05 ? '#58b872' : 'var(--text2)');
+  const dltSign = dlt >= 0 ? '+' : '';
   tip.innerHTML=
     `<div class="ti">${d.id}</div><div class="tt">${d.title}</div>`+
-    `<div class="tr"><span>H (hybridity)</span><span class="tv" style="color:${sc}">${d.H.toFixed(3)}</span></div>`+
+    `<div class="tr"><span>H ${HMODE}</span><span class="tv" style="color:${sc}">${Hv.toFixed(3)}</span></div>`+
+    `<div class="tr"><span>H local</span><span class="tv">${Hloc.toFixed(3)}</span></div>`+
+    `<div class="tr"><span>H global</span><span class="tv">${Hglob.toFixed(3)}</span></div>`+
+    `<div class="tr"><span>Δ contam.</span><span class="tv" style="color:${dltCol}">${dltSign}${dlt.toFixed(3)}</span></div>`+
     `<div class="tr"><span>Articles</span><span class="tv">${d.n}</span></div>`+
     `<div class="tr"><span>Dom. layer</span><span class="tv">${d.dom}</span></div>`+
     (d.heatmap?'<div class="tc">↗ Click for heatmap</div>':'');
@@ -688,6 +1113,8 @@ function closeP(){
   document.getElementById("lgd").style.display="none";
   document.getElementById("ph-lamf").style.display="none";
   document.getElementById("ph-layers-bar").style.display="none";
+  document.getElementById("ph-lamf-bar-glob").style.display="none";
+  document.getElementById("h-trio").style.display="none";
 }
 
 function applyScale(s){
@@ -724,20 +1151,46 @@ function openP(d){
   document.getElementById("ph-n").textContent=d.n+" articoli";
   document.getElementById("ph-dom").textContent=d.dom;
   const sc=document.getElementById("ph-sc");
-  sc.textContent="ᴸH = "+d.H.toFixed(3);
-  sc.title = "Shannon entropy sui 4 layer emersi (0=puro, 1=uniforme)";
+  // Badge H — segue HMODE (toggle local/global)
+  const _Hloc  = (d.H_local  != null ? d.H_local  : (d.H || 0));
+  const _Hglob = (d.H_global != null ? d.H_global : _Hloc);
+  const _Hdlt  = (d.H_delta  != null ? d.H_delta  : (_Hglob - _Hloc));
+  const _Hcur  = HMODE === 'global' ? _Hglob : _Hloc;
+  const _Hpfx  = HMODE === 'global' ? 'ᴳH' : 'ᴸH';
+  sc.textContent = _Hpfx + ' = ' + _Hcur.toFixed(3);
+  sc.title = HMODE === 'global'
+    ? 'Entropia globale: include la complessità ereditata via citazioni (λ=0.5)'
+    : 'Entropia locale: distribuzione interna sui 4 livelli Lamfalussy (0=puro, 1=uniforme)';
   sc.className="ps";
-  const _scC = d3.color(hcol(d.H));
+  const _scC = d3.color(hcol(_Hcur));
   sc.style.color = _scC.brighter(0.4).formatHex();
   sc.style.background = `rgba(${_scC.r},${_scC.g},${_scC.b},0.15)`;
   sc.style.border = `1px solid rgba(${_scC.r},${_scC.g},${_scC.b},0.4)`;
+
+  // Trio H_local / H_global / Δ
+  const trio = document.getElementById('h-trio');
+  if(d.H_global != null || d.H_local != null){
+    trio.style.display = 'flex';
+    document.getElementById('ht-loc-val').textContent  = _Hloc.toFixed(3);
+    document.getElementById('ht-glob-val').textContent = _Hglob.toFixed(3);
+    const dltEl = document.getElementById('ht-delta-val');
+    const dltCell = document.getElementById('ht-delta-cell');
+    dltEl.textContent = (_Hdlt >= 0 ? '+' : '') + _Hdlt.toFixed(3);
+    dltCell.classList.remove('delta-pos','delta-neg');
+    if(_Hdlt >  0.05) dltCell.classList.add('delta-pos');
+    else if(_Hdlt < -0.05) dltCell.classList.add('delta-neg');
+    // colore valori H
+    document.getElementById('ht-loc-val').style.color  = d3.color(hcol(_Hloc)).brighter(0.4).formatHex();
+    document.getElementById('ht-glob-val').style.color = d3.color(hcol(_Hglob)).brighter(0.4).formatHex();
+  } else { trio.style.display = 'none'; }
+
   // Lamfalussy badge — shown if available in data
   const lb=document.getElementById("ph-lamf");
   if(d.eu){lb.textContent="🇪🇺 EU";lb.style.display="inline";lb.style.background="rgba(26,127,193,.15)"}
   else if(d.dom){lb.textContent=d.dom.slice(0,22)+(d.dom.length>22?'…':'');lb.style.display="inline";lb.style.background=""}
   else lb.style.display="none";
 
-  // Lamfalussy distribution bar
+  // Barra distribuzione LOCALE
   const lamfBar=document.getElementById('ph-lamf-bar');
   if(d.lamf){
     lamfBar.style.display='block';
@@ -747,6 +1200,17 @@ function openP(d){
       document.getElementById('lpct-'+k).textContent=' '+Math.round(pct)+'%';
     });
   } else { lamfBar.style.display='none'; }
+
+  // Barra distribuzione GLOBALE (post-diffusione)
+  const lamfBarG = document.getElementById('ph-lamf-bar-glob');
+  if(d.lamf_glob){
+    lamfBarG.style.display='block';
+    ['L1','L2','L3','L4'].forEach(k=>{
+      const pct = d.lamf_glob[k] || 0;
+      document.getElementById('lbsg-'+k).style.width = pct + '%';
+      document.getElementById('lpctg-'+k).textContent = ' ' + Math.round(pct) + '%';
+    });
+  } else { lamfBarG.style.display='none'; }
 
   // ph-layers-bar rimossa: mostrava media di a.vals (layer emersi) con etichette
   // Lamfalussy — risultato sempre ~25% uniforme. La ph-lamf-bar sopra è sufficiente.
@@ -759,10 +1223,9 @@ function openP(d){
 
   const arts=(typeof window.__HEATMAPS__!=='undefined')?window.__HEATMAPS__[d.id]:null;
 
-  // Sovrascrive badge H e barra distribuzione con dati live da heatmaps.json.
-  // I valori in NODES[] possono essere stale; la fonte autorevole e' a.lamf
-  // degli articoli effettivamente classificati.
-  // Wrappato in try-catch: un eventuale errore NON deve impedire il render della heatmap.
+  // Sovrascrive la barra locale con dati live da heatmaps.json (gli articoli
+  // effettivamente classificati). Il badge H segue invece HMODE: se HMODE='local'
+  // viene aggiornato dal valore live; se HMODE='global' lascia _Hglob già impostato.
   if(arts&&arts.length){ try {
     const LAMF_KEYS=['L1','L2','L3','L4'];
     const livePct=LAMF_KEYS.map(k=>
@@ -774,12 +1237,21 @@ function openP(d){
     const pn_badge=livePct.map(v=>v/ps_badge);
     const liveH=-pn_badge.reduce((acc,p)=>acc+p*Math.log2(p+eps_badge),0)/Math.log2(Math.max(livePct.length,2));
     const safeH=isFinite(liveH)&&liveH>=0?liveH:0;
-    sc.textContent='\u1d38H = '+safeH.toFixed(3);
-    const _lC=d3.color(hcol(safeH));
-    if(_lC){
-      sc.style.color=_lC.brighter(0.4).formatHex();
-      sc.style.background='rgba('+_lC.r+','+_lC.g+','+_lC.b+',0.15)';
-      sc.style.border='1px solid rgba('+_lC.r+','+_lC.g+','+_lC.b+',0.4)';
+    // Aggiorna badge solo in modalità local (dato live); in global resta _Hglob
+    if(HMODE === 'local'){
+      sc.textContent='\u1d38H = '+safeH.toFixed(3);
+      const _lC=d3.color(hcol(safeH));
+      if(_lC){
+        sc.style.color=_lC.brighter(0.4).formatHex();
+        sc.style.background='rgba('+_lC.r+','+_lC.g+','+_lC.b+',0.15)';
+        sc.style.border='1px solid rgba('+_lC.r+','+_lC.g+','+_lC.b+',0.4)';
+      }
+      // Aggiorna anche il valore 'H local' nel trio con il dato live
+      const locValEl = document.getElementById('ht-loc-val');
+      if(locValEl){
+        locValEl.textContent = safeH.toFixed(3);
+        locValEl.style.color = (d3.color(hcol(safeH))||d3.color('#888')).brighter(0.4).formatHex();
+      }
     }
     lamfBar.style.display='block';
     LAMF_KEYS.forEach((k,i)=>{
@@ -801,7 +1273,7 @@ function openP(d){
   } else if(arts&&arts.length){
     lgd.style.display="flex";tb.style.display="flex";
     pc.style.position="relative";
-    const svgEl=buildHM(arts);
+    const svgEl=buildHM(arts, d);
     hmNW=+svgEl.getAttribute("width")+32;
     hmNH=+svgEl.getAttribute("height")+32;
     pc.innerHTML="";
@@ -814,7 +1286,7 @@ function openP(d){
     pc.innerHTML=`<div class="hm-ph"><div class="ico">⬡</div>`+
       `<p>Full heatmap available after pipeline run.<br>Dominant layer:</p>`+
       `<div class="pd">${d.dom}</div>`+
-      `<p style="margin-top:12px;font-size:9.5px;color:var(--text3)">Hᴸ = ${d.H.toFixed(3)} · ${d.n} articoli analizzati</p></div>`;
+      `<p style="margin-top:12px;font-size:9.5px;color:var(--text3)">${HMODE === 'global' ? 'ᴳ' : 'ᴸ'}H = ${getH(d).toFixed(3)} · ${d.n} articoli analizzati</p></div>`;
   }
   dp.classList.add("open");
 }
@@ -833,12 +1305,15 @@ function computeHLamf(lamf){
   return Math.max(0,Math.min(1, rawH/Math.log2(Math.max(vals.length,2))));
 }
 
-function buildHM(arts){
+function buildHM(arts, nodeData){
   const CW=120,CH=28,LW=64,EBW=40,ELW=30,EGAP=10,PT=150;
   const EW=EBW+ELW+4;  // colonna singola H (layer emersi); Lamfalussy H rimossa
   const TH=30, GAP=8;                                    // riga aggregata
   const nL=L1.length,nA=arts.length;
-  const W=LW+nL*CW+EW+4, H=PT+nA*CH+GAP+TH+12;           // +GAP+TH
+  // Mostra la riga AGGR_GLOB solo se il nodo ha lamf_glob (calcolato dal notebook in Fase E)
+  const hasGlob = !!(nodeData && nodeData.lamf_glob);
+  const extraH  = hasGlob ? TH : 0;
+  const W=LW+nL*CW+EW+4, H=PT+nA*CH+GAP+TH+extraH+12;
   const NS="http://www.w3.org/2000/svg";
   const el=document.createElementNS(NS,"svg");
   el.setAttribute("width",W);el.setAttribute("height",H);
@@ -857,7 +1332,7 @@ function buildHM(arts){
   });
   const ehx=LW+nL*CW+EBW/2+6;
   el.appendChild(mk("text",{x:ehx,y:PT-28,"font-size":"10",fill:"#8898c0","text-anchor":"middle"},"H"));
-  el.appendChild(mk("text",{x:ehx,y:PT-14,"font-size":"10",fill:"#8898c0","text-anchor":"middle"},"entropia"));
+  el.appendChild(mk("text",{x:ehx,y:PT-14,"font-size":"10",fill:"#8898c0","text-anchor":"middle"},"entropy"));
 
   // ── Sort numerico articoli ───────────────────────────────────────────────
   arts = [...arts].sort((a,b)=>{
@@ -874,10 +1349,10 @@ function buildHM(arts){
   arts.forEach((a,i)=>{
     const y=PT+i*CH;
     if(i%2===0)el.appendChild(mk("rect",{x:LW,y,width:nL*CW,height:CH,fill:"rgba(255,255,255,.018)"}));
-    const hasInteraction = a.txt || (a.ev&&a.ev.length) || a.lamf;
+    const hasInteraction = a.txt || (a.pvs&&a.pvs.length) || (a.ev&&a.ev.length) || a.lamf;
     const ov=mk('rect',{x:0,y,width:LW+nL*CW,height:CH,fill:'transparent',cursor:hasInteraction?'pointer':'default','data-i':i});
     if(hasInteraction){
-      ov.addEventListener('click',()=>openArtPanel(a.id,a.txt||'',a.ev||[],a.lamf||null));
+      ov.addEventListener('click',()=>openArtPanel(a.id,a.txt||'',a.pvs||a.ev||[],a.lamf||null));
       ov.addEventListener('mouseenter',()=>{ov.setAttribute('fill','rgba(255,255,255,.04)');});
       ov.addEventListener('mouseleave',()=>{ov.setAttribute('fill','transparent');});
     }
@@ -948,6 +1423,54 @@ function buildHM(arts){
   el.appendChild(mk("text",{x:bxT+EBW+6,y:yT+TH*.68,"font-size":"11",
     fill:ecol(Hagg),"font-weight":"600","text-anchor":"start"},
     Hagg<=0?"0.00":Hagg.toFixed(2)));
+
+  // ── Riga AGGR_GLOB — distribuzione globale (post-diffusione, λ=0.5) ──────
+  // Ispirata alla Figura 12 di Bellomarini et al. (2025): metriche multiple
+  // per la stessa unità di analisi giustapposte come righe della heatmap.
+  if(hasGlob){
+    const yG = yT + TH;
+    // Somme per il color scheme (verde anziché blu per distinguerla otticamente)
+    const totalsG = LAMF_KEYS.map(k => +(nodeData.lamf_glob[k] || 0));
+    const pSumG   = totalsG.reduce((a,b)=>a+b,0) || 1;
+    const pNormG  = totalsG.map(v => v / pSumG);
+    let HaggG = -pNormG.reduce((acc,p)=>acc + p * Math.log2(p + eps_agg), 0) / Math.log2(Math.max(totalsG.length, 2));
+    if (!isFinite(HaggG) || HaggG < 0) HaggG = 0;
+
+    // separatore sottile fra AGGR e AGGR_GLOB
+    el.appendChild(mk("line",{x1:LW,y1:yG,x2:LW+nL*CW+EW,y2:yG,
+      stroke:"#252a3a","stroke-width":"1"}));
+    // sfondo riga (verde tenue)
+    el.appendChild(mk("rect",{x:LW,y:yG,width:nL*CW,height:TH,fill:"rgba(58,156,110,.05)"}));
+    // label
+    el.appendChild(mk("text",{x:LW-5,y:yG+TH*.68,"font-size":"10.5",
+      fill:"#7fc497","font-weight":"600","text-anchor":"end","letter-spacing":"0.5"},"AGGR_GLOB"));
+    // celle — palette verde per distinguerla dal blu locale
+    function cgreen(v){ if(v===0) return "#0c1018"; return d3.interpolateRgb("#0c1018", "#3a9c6e")(.20+(v/100)*.80); }
+    totalsG.forEach((v,j)=>{
+      const x=LW+j*CW;
+      el.appendChild(mk("rect",{x,y:yG,width:CW-1,height:TH-1,fill:cgreen(v),rx:"1.5",
+        stroke:"rgba(120,200,150,.25)","stroke-width":"1"}));
+      if(v>=0.5){
+        const tf=v>50?"rgba(255,255,255,.95)":v>20?"rgba(210,235,220,.85)":"rgba(110,180,140,.75)";
+        el.appendChild(mk("text",{x:x+CW/2,y:yG+TH*.68,"font-size":"11",
+          "font-weight":"600",fill:tf,"text-anchor":"middle"},Math.round(v)+"%"));
+      }
+    });
+    // entropia globale
+    const bxG=LW+nL*CW+6, bwG=Math.max(0,HaggG*EBW);
+    el.appendChild(mk("rect",{x:bxG,y:yG+5,width:EBW,height:TH-11,fill:"#141820",rx:"2.5"}));
+    el.appendChild(mk("rect",{x:bxG,y:yG+5,width:bwG,height:TH-11,fill:ecol(HaggG),rx:"2.5",opacity:".88"}));
+    el.appendChild(mk("text",{x:bxG+EBW+6,y:yG+TH*.68,"font-size":"11",
+      fill:ecol(HaggG),"font-weight":"600","text-anchor":"start"},
+      HaggG<=0?"0.00":HaggG.toFixed(2)));
+
+    // Tooltip (title) sulla label per spiegare cosa significa
+    const labG = mk("rect",{x:0,y:yG,width:LW+nL*CW+EW,height:TH,fill:"transparent"});
+    const titleEl = document.createElementNS(NS,"title");
+    titleEl.textContent = `Distribuzione GLOBALE post-diffusione (λ=0.5). H_global = ${HaggG.toFixed(3)}, H_local (AGGR sopra) = ${Hagg.toFixed(3)}, Δ = ${(HaggG-Hagg>=0?'+':'')}${(HaggG-Hagg).toFixed(3)}`;
+    labG.appendChild(titleEl);
+    el.appendChild(labG);
+  }
   // (H Lamfalussy rimossa — v. fix commit 2025-04)
 
   return el;
