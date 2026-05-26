@@ -1,13 +1,9 @@
 pandas
-networkx
 numpy
 beautifulsoup4
 eurlex
-sentence-transformers
-scikit-learn
-scipy
-umap-learn
-hdbscan
 openai
 python-dotenv
 pymupdf
+pdfplumber
+requests
