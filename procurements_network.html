@@ -129,10 +129,14 @@ header h1{font-size:12.5px;font-weight:500;letter-spacing:.02em}
 #pc::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 /* Graph legends */
 #gl-hybrid,#gl-edges,#gl-split-legend{position:absolute;bottom:14px;background:rgba(10,12,18,.95);border:1px solid var(--border2);border-radius:5px;padding:13px 17px;font-size:11.5px;font-family:var(--mono);color:var(--text);backdrop-filter:blur(12px)}
-#gl-hybrid{left:14px}
-#gl-edges{left:189px}
-#gl-split-legend{left:420px;border-color:rgba(52,200,138,.3);display:none}
-.glti{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:9px;font-weight:500}
+#gl-hybrid {
+  left: 14px;
+  background: rgba(5, 6, 10, 0.97);   /* più scuro */
+  padding: 16px 22px;                  /* più respiro */
+}
+#gl-edges{left:237px}
+#gl-split-legend{left:465px;border-color:rgba(52,200,138,.3);display:none}
+.glti{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:9px;font-weight:500}
 .glr{display:flex;align-items:center;gap:8px;margin-bottom:4px;cursor:pointer;border-radius:3px;padding:1px 3px;transition:background .1s}
 .glr:hover{background:rgba(255,255,255,.05)}
 .glr.faded{opacity:.3}
@@ -219,11 +223,11 @@ header h1{font-size:12.5px;font-weight:500;letter-spacing:.02em}
     <div id="gl-hybrid">
       <div class="glti">Hybridity H <span id="gl-hmode" style="color:var(--accent2);text-transform:none;letter-spacing:0">· local</span></div>
       <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
-        <span style="font-size:8.5px;color:var(--text3)">0</span>
-        <canvas id="gl-hyb-bar" width="110" height="9" style="border-radius:2px"></canvas>
-        <span style="font-size:8.5px;color:var(--text3)">1</span>
+        <span style="font-size:10px;color:var(--text3)">0</span>
+        <canvas id="gl-hyb-bar" width="150" height="12" style="border-radius:3px"></canvas>
+        <span style="font-size:10px;color:var(--text3)">1</span>
       </div>
-      <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--text3);padding:0 13px;margin-bottom:2px"><span>pure</span><span>uniform</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--text3);padding:0 16px;margin-bottom:2px"><span>pure</span><span>uniform</span></div>
       <div class="glcr">
         <div class="glc" style="width:7px;height:7px"></div>
         <div class="glc" style="width:13px;height:13px"></div>
