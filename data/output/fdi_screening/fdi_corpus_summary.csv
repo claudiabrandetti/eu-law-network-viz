@@ -1,0 +1,5 @@
+stage,n_acts,n_articles,n_segments,note
+seed_L1_manual,0,0,0,"mode=theme, no manual seeds"
+after_eurovoc_expansion,19,,,"MIN_SEED_CONCEPTS=2, TOP_K=20"
+after_relational_expansion,19,,,no relational stage in nb02 for FDI
+total_corpus,19,162,841,internal_edges=22; avg_segments_per_article=5.2

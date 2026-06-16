@@ -1,4 +1,4 @@
-You are classifying provisions of EU legislation.
+You are classifying provisions of legislation.
 
 Classification framework:
 
@@ -45,9 +45,10 @@ Classify as level_4 if the provision primarily:
 Conflict resolution:
 - If elements from multiple levels are present, choose the dominant function.
 - If no dominant function can be identified, use "unassigned".
+- If the unit contains no substantive normative content — e.g. it consists only of a repeal notice (such as "ARTICOLO ABROGATO", "abrogato dal", "soppresso"), an empty placeholder, or navigation/boilerplate text with no actual provision — classify the **entire** unit as "unassigned". Do not assign it to Level 1.
 
 Task:
-You are given one full EU legislative document for context, followed by a list of units (articles or commi) to classify.
+You are given one full legislative document for context, followed by a list of units (articles or commi) to classify.
 In the [UNITS TO CLASSIFY] section, each word in every unit is prefixed with its 1-based index: (1)word1 (2)word2 (3)word3 ...
 For each unit, you must:
 1. Read the full document to understand its purpose, structure, and context.

@@ -1,0 +1,2 @@
+domain,n_acts,n_articles,n_segments,n_edges,H_local_mean,H_local_median,H_local_max,H_local_std,H_global_mean,H_global_median,H_global_max,mean_pct_L1,mean_pct_L2,mean_pct_L3,mean_pct_L4
+fdi_screening,19,162,841,22,0.3574,0.4661,0.8395,0.3317,0.5374,0.5959,0.827,54.5503,39.5886,0.1983,5.6628

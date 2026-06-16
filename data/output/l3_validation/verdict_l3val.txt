@@ -1,0 +1,51 @@
+L3 VALIDATION -- PLAIN TEXT VERDICT
+=================================================================
+
+Acts tested: ['32010R1095', '32010R1093', '32010R1094']
+
+32010R1095 (ESMA Regulation No 1095/2010):
+  n_articles=82, dominant=L1, act-level L3=2.93%
+  Mean L1=46.0%  L2=31.9%  L3=2.9%  L4=19.1%
+
+32010R1093 (EBA Regulation No 1093/2010):
+  n_articles=82, dominant=L1, act-level L3=3.42%
+  Mean L1=43.5%  L2=34.9%  L3=3.4%  L4=18.1%
+
+32010R1094 (EIOPA Regulation No 1094/2010):
+  n_articles=82, dominant=L1, act-level L3=3.43%
+  Mean L1=46.5%  L2=33.4%  L3=3.4%  L4=16.7%
+
+Focal articles (expected-L3: 8,16,29,30,31; L4 contrast: 17,18):
+  32010R1095 Art.  8***: L1=40.9% L2=30.5% L3=13.6% L4=14.9% dom=L1
+  32010R1095 Art. 16***: L1=0.0% L2=7.6% L3=39.4% L4=53.0% dom=L4
+  32010R1095 Art. 17   : L1=0.0% L2=6.7% L3=0.0% L4=93.3% dom=L4
+  32010R1095 Art. 18   : L1=3.9% L2=0.0% L3=0.0% L4=96.1% dom=L4
+  32010R1095 Art. 29***: L1=16.6% L2=73.0% L3=10.3% L4=0.0% dom=L2
+  32010R1095 Art. 30***: L1=0.0% L2=50.3% L3=38.1% L4=11.7% dom=L2
+  32010R1095 Art. 31***: L1=10.0% L2=62.9% L3=11.1% L4=16.1% dom=L2
+  32010R1093 Art.  8***: L1=32.0% L2=43.8% L3=13.6% L4=10.6% dom=L2
+  32010R1093 Art. 16***: L1=0.0% L2=7.4% L3=83.3% L4=9.3% dom=L3
+  32010R1093 Art. 17   : L1=2.9% L2=3.9% L3=0.0% L4=93.2% dom=L4
+  32010R1093 Art. 18   : L1=1.0% L2=15.8% L3=0.0% L4=83.2% dom=L4
+  32010R1093 Art. 29***: L1=23.9% L2=55.2% L3=20.9% L4=0.0% dom=L2
+  32010R1093 Art. 30***: L1=0.0% L2=48.1% L3=40.3% L4=11.6% dom=L2
+  32010R1093 Art. 31***: L1=26.9% L2=40.1% L3=11.2% L4=21.8% dom=L2
+  32010R1094 Art.  8***: L1=24.0% L2=43.7% L3=12.1% L4=20.2% dom=L2
+  32010R1094 Art. 16***: L1=0.0% L2=8.0% L3=63.3% L4=28.7% dom=L3
+  32010R1094 Art. 17   : L1=2.9% L2=6.8% L3=0.0% L4=90.3% dom=L4
+  32010R1094 Art. 18   : L1=1.0% L2=0.0% L3=0.0% L4=99.0% dom=L4
+  32010R1094 Art. 29***: L1=14.8% L2=74.3% L3=10.9% L4=0.0% dom=L2
+  32010R1094 Art. 30***: L1=0.0% L2=58.6% L3=29.7% L4=11.7% dom=L2
+  32010R1094 Art. 31***: L1=14.2% L2=58.4% L3=11.2% L4=16.2% dom=L2
+
+Top 5 most-L3 articles:
+  32010R1093 Art.  16: L3=83.3%  dom=L3
+  32010R1094 Art.  34: L3=72.5%  dom=L3
+  32010R1094 Art.  16: L3=63.3%  dom=L3
+  32010R1093 Art.  30: L3=40.3%  dom=L2
+  32010R1095 Art.  16: L3=39.4%  dom=L4
+
+VERDICT: FAIL -- L3 not reliably detected in institutionally L3-bearing articles. The classifier appears to under-detect L3, and the procurement L3 reading should be downgraded to an open question.
+
+Baseline reference (MiFID II, MiFIR, 2017/565): L3 ~1.0%
+Pass criterion: act-level L3 >= 10%, Art.16 L3 >> baseline, expected-L3 set mean >= 20%
