@@ -293,15 +293,14 @@ header h1{font-size:12.5px;font-weight:500;letter-spacing:.02em}
             <div class="lamf-seg" id="lbs-L2" style="background:#b090e0"></div>
             <div class="lamf-seg" id="lbs-L3" style="background:#3a9c6e"></div>
             <div class="lamf-seg" id="lbs-L4" style="background:#c85c3a"></div>
-            <div class="lamf-seg" id="lbs-UN" style="background:#5a6a8a;opacity:0.6"></div>
           </div>
           <div class="lamf-lbls">
             <span style="color:#4f8ef7">L1<span class="lamf-lbl-pct" id="lpct-L1"> —</span></span>
             <span style="color:#b090e0">L2<span class="lamf-lbl-pct" id="lpct-L2"> —</span></span>
             <span style="color:#3a9c6e">L3<span class="lamf-lbl-pct" id="lpct-L3"> —</span></span>
             <span style="color:#c85c3a">L4<span class="lamf-lbl-pct" id="lpct-L4"> —</span></span>
-            <span style="color:#5a6a8a">N/A<span class="lamf-lbl-pct" id="lpct-UN"></span></span>
           </div>
+          <div id="lbl-un-wrap" style="display:none;margin-top:3px;font-size:8px;color:#5a6a8a;font-family:var(--mono)">incl. <span id="lpct-UN"></span> non-substantive</div>
         </div>
         <div class="lamf-bar" id="ph-lamf-bar-g" style="display:none">
           <div class="lamf-bar-cap">global distribution (post-diffusion λ=0.5)</div>
@@ -310,15 +309,14 @@ header h1{font-size:12.5px;font-weight:500;letter-spacing:.02em}
             <div class="lamf-seg" id="lbsg-L2" style="background:#b090e0"></div>
             <div class="lamf-seg" id="lbsg-L3" style="background:#3a9c6e"></div>
             <div class="lamf-seg" id="lbsg-L4" style="background:#c85c3a"></div>
-            <div class="lamf-seg" id="lbsg-UN" style="background:#5a6a8a;opacity:0.6"></div>
           </div>
           <div class="lamf-lbls">
             <span style="color:#4f8ef7">L1<span class="lamf-lbl-pct" id="lpctg-L1"> —</span></span>
             <span style="color:#b090e0">L2<span class="lamf-lbl-pct" id="lpctg-L2"> —</span></span>
             <span style="color:#3a9c6e">L3<span class="lamf-lbl-pct" id="lpctg-L3"> —</span></span>
             <span style="color:#c85c3a">L4<span class="lamf-lbl-pct" id="lpctg-L4"> —</span></span>
-            <span style="color:#5a6a8a">N/A<span class="lamf-lbl-pct" id="lpctg-UN"></span></span>
           </div>
+          <div id="lbl-ung-wrap" style="display:none;margin-top:3px;font-size:8px;color:#5a6a8a;font-family:var(--mono)">incl. <span id="lpctg-UN"></span> non-substantive</div>
         </div>
       </div>
       <!-- Split focus panel -->
@@ -656,9 +654,9 @@ function openP(d){
   }else trio.style.display='none';
   // Lamf bars
   const lb_bar=document.getElementById('ph-lamf-bar');
-  if(d.lamf){lb_bar.style.display='block';LAMF_KEYS.forEach(k=>{const e1=document.getElementById('lbs-'+k),e2=document.getElementById('lpct-'+k);if(e1)e1.style.width=(d.lamf[k]||0)+'%';if(e2)e2.textContent=' '+Math.round(d.lamf[k]||0)+'%';});const _unPct=Math.max(0,100-LAMF_KEYS.reduce((s,k)=>s+(d.lamf[k]||0),0));const _eu=document.getElementById('lbs-UN'),_eu2=document.getElementById('lpct-UN');if(_eu)_eu.style.width=_unPct+'%';if(_eu2)_eu2.textContent=_unPct>=0.5?' '+Math.round(_unPct)+'%':'';}else lb_bar.style.display='none';
+  if(d.lamf){lb_bar.style.display='block';LAMF_KEYS.forEach(k=>{const e1=document.getElementById('lbs-'+k),e2=document.getElementById('lpct-'+k);if(e1)e1.style.width=(d.lamf[k]||0)+'%';if(e2)e2.textContent=' '+Math.round(d.lamf[k]||0)+'%';});const _nU=d.n_unassigned||0;const _unPct=_nU/Math.max((d.n||0)+_nU,1)*100;const _uw=document.getElementById('lbl-un-wrap'),_eu2=document.getElementById('lpct-UN');if(_uw)_uw.style.display=_unPct>=0.5?'block':'none';if(_eu2)_eu2.textContent=_unPct>=0.5?Math.round(_unPct)+'%':'';}else lb_bar.style.display='none';
   const lb_barg=document.getElementById('ph-lamf-bar-g');
-  if(d.lamf_glob){lb_barg.style.display='block';const _nUnG=d.n_unassigned||0,_nTotG=Math.max((d.n||0)+_nUnG,1),_scaleG=(d.n||0)/_nTotG;LAMF_KEYS.forEach(k=>{const v=(d.lamf_glob[k]||0)*_scaleG;const e1=document.getElementById('lbsg-'+k),e2=document.getElementById('lpctg-'+k);if(e1)e1.style.width=v+'%';if(e2)e2.textContent=' '+Math.round(v)+'%';});const _unPctG=_nUnG/_nTotG*100;const _eug=document.getElementById('lbsg-UN'),_eug2=document.getElementById('lpctg-UN');if(_eug)_eug.style.width=_unPctG+'%';if(_eug2)_eug2.textContent=_unPctG>=0.5?' '+Math.round(_unPctG)+'%':'';}else lb_barg.style.display='none';
+  if(d.lamf_glob){lb_barg.style.display='block';const _nUnG=d.n_unassigned||0,_nTotG=Math.max((d.n||0)+_nUnG,1);LAMF_KEYS.forEach(k=>{const e1=document.getElementById('lbsg-'+k),e2=document.getElementById('lpctg-'+k);if(e1)e1.style.width=(d.lamf_glob[k]||0)+'%';if(e2)e2.textContent=' '+Math.round(d.lamf_glob[k]||0)+'%';});const _unPctG=_nUnG/_nTotG*100;const _uwg=document.getElementById('lbl-ung-wrap'),_eug2=document.getElementById('lpctg-UN');if(_uwg)_uwg.style.display=_unPctG>=0.5?'block':'none';if(_eug2)_eug2.textContent=_unPctG>=0.5?Math.round(_unPctG)+'%':'';}else lb_barg.style.display='none';
 
   hmScale=1;document.getElementById('z-val').textContent='100%';
   const pc=document.getElementById('pc');
@@ -702,7 +700,7 @@ function openP(d){
     const eps=1e-9,rawH=-pn.reduce((acc,p)=>acc+p*Math.log2(p+eps),0)/Math.log2(Math.max(livePct.length,2));
     const safeH=isFinite(rawH)&&rawH>=0?rawH:0;
     if(HMODE==='local'){sc.textContent='ᴸH = '+safeH.toFixed(3);const lC=d3.color(hcol(safeH));if(lC){sc.style.color=lC.brighter(0.4).formatHex();sc.style.background=`rgba(${lC.r},${lC.g},${lC.b},.15)`;sc.style.border=`1px solid rgba(${lC.r},${lC.g},${lC.b},.4)`;}}
-    const _subScale=_subA.length/Math.max(arts.length,1);lb_bar.style.display='block';LAMF_KEYS.forEach((k,i)=>{const v=livePct[i]*_subScale;const e1=document.getElementById('lbs-'+k),e2=document.getElementById('lpct-'+k);if(e1)e1.style.width=v+'%';if(e2)e2.textContent=' '+Math.round(v)+'%';});const _unPct=(arts.length-_subA.length)/arts.length*100;const _eu=document.getElementById('lbs-UN'),_eu2=document.getElementById('lpct-UN');if(_eu)_eu.style.width=_unPct+'%';if(_eu2)_eu2.textContent=_unPct>=0.5?' '+Math.round(_unPct)+'%':'';
+    lb_bar.style.display='block';LAMF_KEYS.forEach((k,i)=>{const e1=document.getElementById('lbs-'+k),e2=document.getElementById('lpct-'+k);if(e1)e1.style.width=livePct[i]+'%';if(e2)e2.textContent=' '+Math.round(livePct[i])+'%';});const _unPct=(arts.length-_subA.length)/arts.length*100;const _uw=document.getElementById('lbl-un-wrap'),_eu2=document.getElementById('lpct-UN');if(_uw)_uw.style.display=_unPct>=0.5?'block':'none';if(_eu2)_eu2.textContent=_unPct>=0.5?Math.round(_unPct)+'%':'';
   }catch(err){console.warn('live override:',err);}}
 
   if(arts&&arts.length){

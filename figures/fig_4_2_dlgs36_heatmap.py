@@ -290,11 +290,14 @@ ax_l1.axvline(
     x=overall_mean_l1,
     color=REF_COL, linewidth=0.8, linestyle='--', alpha=0.85, zorder=2,
 )
-# Reference label at top edge
+# Reference label near the TOP of Book II, in the white space to the right of the
+# dashed line. Placed away from the per-Book value labels (which sit at each Book's
+# mid-point) so it never overlaps the "21.5%" Book II bar label.
+_avg_y = book_row_ranges[1][0] + 6
 ax_l1.text(
-    overall_mean_l1, -0.5,
-    f'avg\n{overall_mean_l1:.1f}%',
-    ha='center', va='bottom',
+    overall_mean_l1 + 0.8, _avg_y,
+    f'avg {overall_mean_l1:.1f}%',
+    ha='left', va='center',
     fontsize=5.5, fontfamily='serif', color=REF_COL, style='italic',
     clip_on=False, zorder=5,
 )
