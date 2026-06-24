@@ -32,7 +32,7 @@ function normPv(p){const label=p.label||p.lv||p.layer||'';const key=label.starts
 function _norm(s){return String(s).toLowerCase().replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[\u2013\u2014]/g,'-').replace(/[\u00A0]/g,' ').replace(/[^\p{L}\p{N}\s]/gu,' ').replace(/\s+/g,' ').trim();}
 function resolvePvRanges(text,pvs){const words=text?text.trim().split(/\s+/):[];const n=words.length;const out=(pvs||[]).map(()=>null);if(!pvs||!pvs.length||!n)return out;const hay=words.join(' ');const normHay=_norm(hay);const normWords=normHay.split(' ');function findNS(nn){if(!nn)return -1;const nw=nn.split(' ').filter(Boolean);if(!nw.length)return -1;outer:for(let i=0;i<=normWords.length-nw.length;i++){for(let j=0;j<nw.length;j++){if(normWords[i+j]!==nw[j])continue outer;}return i;}return -1;}function findPfx(nn,K){const nw=nn.split(' ').filter(Boolean);if(!nw.length)return -1;return findNS(nw.slice(0,Math.min(K,nw.length)).join(' '));}for(let i=0;i<pvs.length;i++){const p=normPv(pvs[i]);let r=null;if(p.start!=null&&p.end!=null){const s=Math.max(0,p.start-1),e=Math.min(n-1,p.end-1);if(s<=e&&s<n)r={s,e};}if(!r&&p.testo){const t=p.testo.trim(),idx=hay.indexOf(t);if(idx!==-1){const s=hay.slice(0,idx).split(/\s+/).filter(Boolean).length;r={s,e:Math.min(n-1,s+t.split(/\s+/).length-1)};}}if(!r&&p.testo){const nn=_norm(p.testo);let s=findNS(nn);if(s===-1)s=findPfx(nn,10);if(s===-1)s=findPfx(nn,5);if(s!==-1)r={s,e:Math.min(n-1,s+nn.split(' ').filter(Boolean).length-1)};}out[i]=r;}return out;}
 function highlightText(text,pvs,provisions){if(provisions&&provisions.length&&text){const words=text.trim().split(/\s+/);const n=words.length;const tkLv=new Array(n).fill(null),tkR=new Array(n).fill(''),tkIdx=new Array(n).fill(-1);for(let i=0;i<provisions.length;i++){const pv=provisions[i];if(!LCOL[pv.label])continue;const s=Math.max(0,pv.start-1),e=Math.min(n-1,pv.end-1);for(let j=s;j<=e;j++){tkLv[j]=pv.label;tkR[j]=pv.reason||'';tkIdx[j]=i;}}let html='',i=0;while(i<n){const lv=tkLv[i];if(!lv){html+=escHtml(words[i])+' ';i++;}else{let j=i;while(j<n&&tkLv[j]===lv&&tkIdx[j]===tkIdx[i])j++;const c=LCOL[lv];html+=`<span class="ev-s ev-${lv}" data-pv-idx="${tkIdx[i]}">${words.slice(i,j).map(escHtml).join(' ')} <span class="ev-tip"><strong style="color:${c}">${lv}</strong>${tkR[i]?' — '+escHtml(tkR[i]):''}</span></span>`;i=j;}}return html;}if(!text){if(pvs&&pvs.length){let o='<div style="color:var(--text3);font-size:9px;margin-bottom:10px;font-style:italic">Testo non disponibile</div>';pvs.forEach((p,i)=>{const pn=normPv(p);if(!pn.testo)return;const c=LCOL[pn.key]||'#888';o+=`<span class="ev-s ev-${pn.key}" data-pv-idx="${i}">${escHtml(pn.testo)}<span class="ev-tip"><strong style="color:${c}">${pn.key}</strong>${pn.reason?' — '+escHtml(pn.reason):''}</span></span>\n\n`;});return o;}return '<span style="color:var(--text3);font-style:italic">Testo non disponibile</span>';}const words=text.trim().split(/\s+/);const n=words.length;const tkLv=new Array(n).fill(null),tkR=new Array(n).fill(''),tkIdx=new Array(n).fill(-1);const ranges=resolvePvRanges(text,pvs);for(let i=0;i<(pvs||[]).length;i++){const r=ranges[i];if(!r)continue;const p=normPv(pvs[i]);if(!LCOL[p.key])continue;for(let j=r.s;j<=r.e;j++){tkLv[j]=p.key;tkR[j]=p.reason;tkIdx[j]=i;}}let html='',i=0;while(i<n){const lv=tkLv[i];if(!lv){html+=escHtml(words[i])+' ';i++;}else{let j=i;while(j<n&&tkLv[j]===lv&&tkR[j]===tkR[i]&&tkIdx[j]===tkIdx[i])j++;const c=LCOL[lv];html+=`<span class="ev-s ev-${lv}" data-pv-idx="${tkIdx[i]}">${words.slice(i,j).map(escHtml).join(' ')} <span class="ev-tip"><strong style="color:${c}">${lv}</strong>${tkR[i]?' — '+escHtml(tkR[i]):''}</span></span>`;i=j;}}return html;}
-function buildProvisionList(pvs,text){if(!pvs||!pvs.length)return'';const words=text?text.trim().split(/\s+/):[];const totalWords=words.length||0;const ranges=resolvePvRanges(text,pvs);const normalized=pvs.map((p,i)=>({...normPv(p),_idx:i,_range:ranges[i]}));const ORDER=['L1','L2','L3','L4'];const groups={};ORDER.forEach(k=>{groups[k]=[];});normalized.forEach(p=>{if(groups[p.key])groups[p.key].push(p);});function pvW(p){if(p._range)return p._range.e-p._range.s+1;if(p.testo)return p.testo.trim().split(/\s+/).length;return 0;}function grpW(grp){if(!totalWords)return 0;const c=new Set();for(const p of grp){if(!p._range)continue;for(let i=p._range.s;i<=p._range.e;i++)c.add(i);}return c.size;}function pvSnip(p){if(p.testo){const tw=p.testo.trim().split(/\s+/);return tw.slice(0,15).map(escHtml).join(' ')+(tw.length>15?'…':'');}if(p._range&&words.length){const{s,e}=p._range;return words.slice(s,Math.min(e+1,s+15)).map(escHtml).join(' ')+(e-s>=15?'…':'');}return '';}const unresolved=normalized.filter(p=>!p._range&&(text&&text.length)).length;let html='<div class="pv-list"><div class="pv-list-title">PROVISIONS</div>';if(unresolved>0)html+=`<div class="pv-warn">⚠ ${unresolved} provision${unresolved>1?'s':''} non localizzate</div>`;ORDER.forEach(key=>{const grp=groups[key];if(!grp||!grp.length)return;const c=LCOL[key]||'#5a6a8a';const gW=grpW(grp);const pct=totalWords>0?Math.min(100,Math.round((gW/totalWords)*100)):null;html+=`<div class="pv-group-hdr" style="color:${c}"><span class="pv-group-key">${key}</span><span class="pv-group-meta">· ${grp.length} prov${pct!=null?' · '+pct+'%':''}</span></div>`;grp.forEach(p=>{const snip=pvSnip(p);const noA=!p._range&&text&&text.length;html+=`<div class="${noA?'pv-row pv-no-anchor':'pv-row'}" data-pv-idx="${p._idx}" style="border-left:3px solid ${c}"${noA?' title="Frase non localizzata"':''}><span class="pv-content"><span class="pv-reason">${escHtml(p.reason||'—')}${noA?' <span class="pv-noanchor-tag">⚠</span>':''}</span>${snip?`<span class="pv-excerpt">${snip}</span>`:''}</span></div>`;});});return html+'</div>';}
+function buildProvisionList(pvs,text){if(!pvs||!pvs.length)return'';const words=text?text.trim().split(/\s+/):[];const totalWords=words.length||0;const ranges=resolvePvRanges(text,pvs);const normalized=pvs.map((p,i)=>({...normPv(p),_idx:i,_range:ranges[i]}));const ORDER=['L1','L2','L3','L4'];const groups={};ORDER.forEach(k=>{groups[k]=[];});normalized.forEach(p=>{if(groups[p.key])groups[p.key].push(p);});function pvW(p){if(p._range)return p._range.e-p._range.s+1;if(p.testo)return p.testo.trim().split(/\s+/).length;return 0;}function grpW(grp){if(!totalWords)return 0;const c=new Set();for(const p of grp){if(!p._range)continue;for(let i=p._range.s;i<=p._range.e;i++)c.add(i);}return c.size;}function pvSnip(p){if(p.testo){const tw=p.testo.trim().split(/\s+/);return tw.slice(0,15).map(escHtml).join(' ')+(tw.length>15?'…':'');}if(p._range&&words.length){const{s,e}=p._range;return words.slice(s,Math.min(e+1,s+15)).map(escHtml).join(' ')+(e-s>=15?'…':'');}return '';}const unresolved=normalized.filter(p=>!p._range&&(text&&text.length)).length;let html='<div class="pv-list"><div class="pv-list-title">PROVISIONS</div>';if(unresolved>0)html+=`<div class="pv-warn">⚠ ${unresolved} provision${unresolved>1?'s':''} non localizzate</div>`;ORDER.forEach(key=>{const grp=groups[key];if(!grp||!grp.length)return;const c=LCOL[key]||'#8e9cbd';const gW=grpW(grp);const pct=totalWords>0?Math.min(100,Math.round((gW/totalWords)*100)):null;html+=`<div class="pv-group-hdr" style="color:${c}"><span class="pv-group-key">${key}</span><span class="pv-group-meta">· ${grp.length} prov${pct!=null?' · '+pct+'%':''}</span></div>`;grp.forEach(p=>{const snip=pvSnip(p);const noA=!p._range&&text&&text.length;html+=`<div class="${noA?'pv-row pv-no-anchor':'pv-row'}" data-pv-idx="${p._idx}" style="border-left:3px solid ${c}"${noA?' title="Frase non localizzata"':''}><span class="pv-content"><span class="pv-reason">${escHtml(p.reason||'—')}${noA?' <span class="pv-noanchor-tag">⚠</span>':''}</span>${snip?`<span class="pv-excerpt">${snip}</span>`:''}</span></div>`;});});return html+'</div>';}
 document.addEventListener('DOMContentLoaded',function(){const pvList=document.getElementById('ap-pvlist');const apBody=document.getElementById('ap-body');if(!pvList||!apBody)return;pvList.addEventListener('mouseover',e=>{const row=e.target.closest('.pv-row');if(!row)return;const idx=row.dataset.pvIdx;apBody.classList.add('has-active');apBody.querySelectorAll('.ev-s').forEach(s=>s.classList.toggle('pv-active',s.dataset.pvIdx===idx));row.classList.add('pv-row-hover');});pvList.addEventListener('mouseout',e=>{const row=e.target.closest('.pv-row');if(!row)return;apBody.classList.remove('has-active');apBody.querySelectorAll('.ev-s').forEach(s=>s.classList.remove('pv-active'));row.classList.remove('pv-row-hover');});pvList.addEventListener('click',e=>{const row=e.target.closest('.pv-row');if(!row)return;const idx=row.dataset.pvIdx;const target=apBody.querySelector(`.ev-s[data-pv-idx="${idx}"]`);if(target){target.scrollIntoView({behavior:'smooth',block:'center'});target.classList.add('pv-flash');setTimeout(()=>target.classList.remove('pv-flash'),900);}else{row.classList.add('pv-flash-row');setTimeout(()=>row.classList.remove('pv-flash-row'),600);}});apBody.addEventListener('mouseover',e=>{const span=e.target.closest('.ev-s');if(!span)return;pvList.querySelectorAll('.pv-row').forEach(r=>r.classList.toggle('pv-row-hover',r.dataset.pvIdx===span.dataset.pvIdx));});apBody.addEventListener('mouseout',()=>pvList.querySelectorAll('.pv-row').forEach(r=>r.classList.remove('pv-row-hover')));});
 function openArtPanel(artId,text,pvs,lamf,provisions){if(lamf){['L1','L2','L3','L4'].forEach(k=>{const e1=document.getElementById('lbs-'+k),e2=document.getElementById('lpct-'+k);if(e1)e1.style.width=(lamf[k]||0)+'%';if(e2)e2.textContent=' '+Math.round(lamf[k]||0)+'%';});}document.getElementById('ap-id').textContent='Art. '+String(artId).replace(/^[a-zA-Z_]+/,'');document.getElementById('ap-body').innerHTML=highlightText(text,pvs||[],provisions||null);document.getElementById('ap-pvlist').innerHTML=buildProvisionList(pvs||[],text||'');document.getElementById('art-panel').style.display='block';}
 </script>
@@ -41,7 +41,7 @@ function openArtPanel(artId,text,pvs,lamf,provisions){if(lamf){['L1','L2','L3','
 :root{
   --bg:#0d0f14;--bg2:#131720;--bg3:#181c26;
   --border:#202535;--border2:#2b3248;
-  --text:#c4cede;--text2:#6e7a95;--text3:#3d4560;
+  --text:#c4cede;--text2:#9aa6c2;--text3:#7e8aa8;
   --accent:#4f8ef7;--accent2:#7aaeff;
   --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
   --c-ref:#4a6fa8;--c-hier:#7b52ab;--c-mod:#c85c3a;--c-proc:#3a9c6e;--c-recep:#1a7fc1;
@@ -301,7 +301,7 @@ header h1{font-size:12.5px;font-weight:500;letter-spacing:.02em}
             <span style="color:#3a9c6e">L3<span class="lamf-lbl-pct" id="lpct-L3"> —</span></span>
             <span style="color:#c85c3a">L4<span class="lamf-lbl-pct" id="lpct-L4"> —</span></span>
           </div>
-          <div id="lbl-un-wrap" style="display:none;margin-top:3px;font-size:8px;color:#5a6a8a;font-family:var(--mono)">incl. <span id="lpct-UN"></span> unassigned</div>
+          <div id="lbl-un-wrap" style="display:none;margin-top:3px;font-size:8px;color:#8e9cbd;font-family:var(--mono)">incl. <span id="lpct-UN"></span> unassigned</div>
         </div>
         <div class="lamf-bar" id="ph-lamf-bar-g" style="display:none">
           <div class="lamf-bar-cap">global distribution (post-diffusion λ=0.5)</div>
@@ -317,7 +317,7 @@ header h1{font-size:12.5px;font-weight:500;letter-spacing:.02em}
             <span style="color:#3a9c6e">L3<span class="lamf-lbl-pct" id="lpctg-L3"> —</span></span>
             <span style="color:#c85c3a">L4<span class="lamf-lbl-pct" id="lpctg-L4"> —</span></span>
           </div>
-          <div id="lbl-ung-wrap" style="display:none;margin-top:3px;font-size:8px;color:#5a6a8a;font-family:var(--mono)">incl. <span id="lpctg-UN"></span> unassigned</div>
+          <div id="lbl-ung-wrap" style="display:none;margin-top:3px;font-size:8px;color:#8e9cbd;font-family:var(--mono)">incl. <span id="lpctg-UN"></span> unassigned</div>
         </div>
       </div>
       <!-- Split focus panel -->
@@ -360,6 +360,7 @@ const L2_LABELS=["Framework","Operational","Supervisory","Enforcement"];
 const LAMF_KEYS=['L1','L2','L3','L4'];
 const LAMF_COLORS={'L1':'#4f8ef7','L2':'#b090e0','L3':'#3a9c6e','L4':'#c85c3a'};
 const FCOL={ref:"#4a6fa8",hier:"#7b52ab",mod:"#c85c3a",proc:"#3a9c6e",recep:"#1a7fc1"};
+const FLABEL={ref:"CITES / RELATED",hier:"BASED_ON / IMPLEMENTS",mod:"AMENDS / REPEALS",proc:"DEROGATES / EXTENDS",recep:"IMPLEMENTED_BY (EU→IT)"}
 
 function ew(w){return w===3?3.2:w===2?2.0:1.1;}
 function eo(w){return w===3?.32:w===2?.22:.14;}
@@ -372,7 +373,7 @@ function nr(n){return 4+Math.pow(n,.48)*1.1;}
 // ── H mode ────────────────────────────────────────────────────────────────────
 let HMODE='local';
 function getH(d){return HMODE==='global'?(d.H_global!=null?d.H_global:(d.H_local!=null?d.H_local:d.H||0)):(d.H_local!=null?d.H_local:d.H||0);}
-function refreshNodeColors(){g.selectAll('g.node circle').transition().duration(200).attr('fill',d=>hcol(getH(d))).attr('stroke',d=>d.eu?'#aac8f0':(d._isSplitBlock?'#34c88a':hcol(getH(d))));}
+function refreshNodeColors(){g.selectAll('g.node circle').transition().duration(200).attr('fill',d=>hcol(getH(d))).attr('stroke',d=>d.eu?'#aac8f0':(d._isSplitBlock?'#34c88a':hcol(getH(d))));const _sfEl=document.getElementById('split-focus');if(_sfEl&&_sfEl.style.display!=='none'&&window.__currentSplitFocusNode)renderSplitFocus(window.__currentSplitFocusNode);}
 (function(){
   const bL=document.getElementById('ht-loc'),bG=document.getElementById('ht-glob');
   if(!bL||!bG)return;
@@ -483,7 +484,7 @@ function initGraph(nodesData,linksData){
 
   lnk.on('mouseover',(e,d)=>{
     const rb=d.resolved_by?`<div class="tr"><span>resolved_by</span><span class="tv">${d.resolved_by}</span></div>`:'';
-    tip.innerHTML=`<div class="et-type" style="color:${FCOL[d.family]||'#888'}">${d.type}</div><div class="et-nodes">${d.source.id||d.source}<br>→ ${d.target.id||d.target}</div>${rb}`;
+    tip.innerHTML=`<div class="et-type" style="color:${FCOL[d.family]||'#888'}">${FLABEL[d.family]||d.family||d.type||''}</div><div class="et-nodes">${d.source.id||d.source}<br>→ ${d.target.id||d.target}</div>${rb}`;
     tip.style.opacity='1';lnk.classed('active',l=>l===d).classed('dimmed',l=>l!==d);
   }).on('mousemove',e=>{const r=gp.getBoundingClientRect();tip.style.left=(e.clientX-r.left+10)+'px';tip.style.top=(e.clientY-r.top-10)+'px';})
     .on('mouseleave',()=>{tip.style.opacity='0';lnk.classed('active',false).classed('dimmed',false);lnk.style('opacity',d=>activeF.size>0&&!activeF.has(d.family)?0.025:eo(d.w));});
@@ -518,7 +519,7 @@ function nodeHover(e,d){
   tip.innerHTML=`<div class="ti">${d.id}</div>${d.title&&d.title!==d.id?`<div class="tt" ...>${escHtml(d.title)}</div>`:''}`+
     `<div class="tr"><span>H ${HMODE}</span><span class="tv" style="color:${sc}">${Hv.toFixed(3)}</span></div>`+
     (d.H_global!=null?`<div class="tr"><span>H global</span><span class="tv">${Hglob.toFixed(3)}</span></div><div class="tr"><span>Δ</span><span class="tv" style="color:${dltCol}">${(dlt>=0?'+':'')+dlt.toFixed(3)}</span></div>`:'')+
-    `<div class="tr"><span>Articles</span><span class="tv">${d.n}</span></div>${d.n_unassigned>0?`<div class="tr"><span style="color:#5a6a8a">Unassigned</span><span class="tv" style="color:#5a6a8a">${d.n_unassigned}</span></div>`:''  }${extra}<div class="tc">↗ click for ${d._isSplitBlock?'split focus':'heatmap'}</div>`;
+    `<div class="tr"><span>Articles</span><span class="tv">${d.n}</span></div>${d.n_unassigned>0?`<div class="tr"><span style="color:#8e9cbd">Unassigned</span><span class="tv" style="color:#8e9cbd">${d.n_unassigned}</span></div>`:''  }${extra}<div class="tc">↗ click for ${d._isSplitBlock?'split focus':'heatmap'}</div>`;
   tip.style.opacity='1';
   lnk.classed('active',l=>(l.source.id||l.source)===d.id||(l.target.id||l.target)===d.id).classed('dimmed',l=>!((l.source.id||l.source)===d.id||(l.target.id||l.target)===d.id));
 }
@@ -555,8 +556,10 @@ function updateSplitBanner(){if(!SPLITS_DATA)return;const m=SPLITS_DATA.meta;con
 function renderSplitFocus(d){
   const sfEl=document.getElementById('split-focus');if(!sfEl)return;
   const si=d._splitInfo||{};const blocks=d._allBlocks||[];
-  const Hbef=si.H_before||d._parentNode?.H||0,Haft=si.H_after||0;
-  const imp=Hbef>0?Math.round((1-Haft/Hbef)*100):0;
+  const HbefLoc=si.H_before||d._parentNode?.H||0,Haft=si.H_after||0;
+  const HbefGlob=d._parentNode?.H_global??null;
+  const Hbef=HMODE==='global'&&HbefGlob!=null?HbefGlob:HbefLoc;
+  const imp=HbefLoc>0?Math.round((1-Haft/HbefLoc)*100):0;
   const valBadge= '';
   let html=`<div class="sf-hdr"><span class="sf-hdr-celex">${d._parentCelex}</span><span style="color:rgba(52,200,138,.5)">→ split</span><span style="background:rgba(52,200,138,.12);color:#34c88a;font-family:var(--mono);font-size:9px;padding:1px 5px;border-radius:2px;border:1px solid rgba(52,200,138,.25)">−${imp}% H</span><span style="margin-left:auto">${valBadge}</span></div><div class="sf-lbl">original node → nodes post split</div>`;
   const N=blocks.length,SH=Math.max(130,N*82+36),SW=460;
@@ -565,9 +568,11 @@ function renderSplitFocus(d){
   s+=`<defs><marker id="sf-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,1 L0,9 L9,5 z" fill="#3a4560"/></marker></defs>`;
   s+=`<circle cx="${PX}" cy="${py}" r="${pR}" fill="${hcol(Hbef)}" fill-opacity=".85" stroke="${hcol(Hbef)}" stroke-width="1.5" cursor="pointer" data-node-id="${d._parentCelex}" data-orig-stroke="${hcol(Hbef)}" onclick="selectSplitNode('${d._parentCelex}')"/>`;
   s+=`<text x="${PX}" y="${py-pR-4}" text-anchor="middle" font-size="9" fill="#8899cc">${(d._parentCelex||'').slice(0,16)}</text>`;
-  s+=`<text x="${PX}" y="${py+pR+11}" text-anchor="middle" font-size="8.5" fill="${hcol(Hbef)}">H=${Hbef.toFixed(2)}</text>`;
+  s+=`<text x="${PX}" y="${py+pR+11}" text-anchor="middle" font-size="8.5" fill="${hcol(Hbef)}">${HMODE==='global'&&HbefGlob!=null?'\u1d33H':'\u1d38H'}=${Hbef.toFixed(2)}</text>`;
   blocks.forEach((b,i)=>{
-    const by=N===1?py:(SH-32)/(N-1)*i+16,bR=Math.min(19,nr(b.n_articles||1)),Hb=b.H_block||0,bCol=hcol(Hb);
+    const by=N===1?py:(SH-32)/(N-1)*i+16,bR=Math.min(19,nr(b.n_articles||1));
+    const Hb=b.H_block||0,HgB=b.H_global!=null?b.H_global:null;
+    const Hdisp=HMODE==='global'&&HgB!=null?HgB:Hb,bCol=hcol(Hdisp);
     const isSel=b.block_id===d.id,bpk=b.partition_key||'',bpkCol=LAMF_COLORS[bpk]||'#8899cc';
     s+=`<line x1="${PX+pR+2}" y1="${py}" x2="${BX-bR-2}" y2="${by}" stroke="#3a4560" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#sf-arr)"/>`;
     s+=`<circle cx="${BX}" cy="${by}" r="${bR}" fill="${bCol}" fill-opacity="${isSel?.95:.5}" stroke="${isSel?'#fff':bCol}" stroke-width="${isSel?2.5:1}" stroke-dasharray="${isSel?'none':'4,2'}" cursor="pointer" data-node-id="${b.block_id}" data-orig-stroke="${bCol}" onclick="selectSplitNode('${b.block_id}')"/>`;
@@ -578,13 +583,14 @@ function renderSplitFocus(d){
       && b.proposed_title.toLowerCase() !== `parte ${bpk.toLowerCase()}`
       ? b.proposed_title.slice(0, 28)
       : '';
-    if (title) s += `<text x="${BX+bR+8}" y="${by+7}" font-size="8.5" fill="#6e7a95">${escHtml(title)}</text>`;
-    s += `<text x="${BX+bR+8}" y="${title ? by+19 : by+7}" font-size="8.5" fill="${bCol}">H_loc=${Hb.toFixed(2)} · ${b.n_articles||0} art.</text>`;
-    const Hg=b.H_global||0;if(Hg>0){const hgC=hcol(Hg),dHg=Hg-Hb;s+=`<text x="${BX+bR+8}" y="${by+31}" font-size="8.5" fill="${hgC}">H_glob=${Hg.toFixed(2)} (Δ${dHg>=0?'+':''}${dHg.toFixed(2)})</text>`;}
+    if (title) s += `<text x="${BX+bR+8}" y="${by+7}" font-size="8.5" fill="#9aa6c2">${escHtml(title)}</text>`;
+    s+=`<text x="${BX+bR+8}" y="${title?by+19:by+7}" font-size="8.5" fill="${HMODE!=='global'?hcol(Hb):'#546080'}">H_loc=${Hb.toFixed(2)} · ${b.n_articles||0} art.</text>`;
+    if(HgB!=null){const dHg=HgB-Hb;s+=`<text x="${BX+bR+8}" y="${by+31}" font-size="8.5" fill="${HMODE==='global'?hcol(HgB):'#546080'}">H_glob=${HgB.toFixed(2)} (Δ${dHg>=0?'+':''}${dHg.toFixed(2)})</text>`;}
   });
   s+='</svg>';
   sfEl.innerHTML=html+s;sfEl.style.display='block';
   window.__currentSplitFocusCelex=d._parentCelex;
+  window.__currentSplitFocusNode=d;
   document.getElementById('sf-resize').style.display='block';
 }
 
@@ -774,7 +780,7 @@ function buildHM(arts,nodeData){
     el.appendChild(mk('text',{x:LW,y:17,'font-size':'8.5','font-weight':'600','letter-spacing':'0.1em',fill:'#34c88a'},'SPLIT SECTION'));
     el.appendChild(mk('text',{x:LW,y:32,'font-size':'11','font-weight':'600',fill:bpkCol},`${nodeData._parentCelex} · ${bpk}`));
     const titleT=(nodeData._proposed_title||'').slice(0,55)+(nodeData._proposed_title||'').length>55?'…':'';
-    el.appendChild(mk('text',{x:LW,y:47,'font-size':'9',fill:'#6e7a95'},escHtml(titleT)));
+    el.appendChild(mk('text',{x:LW,y:47,'font-size':'9',fill:'#9aa6c2'},escHtml(titleT)));
     const Hb=(si.H_before||0).toFixed(3),Ha=(si.H_after||0).toFixed(3);
     el.appendChild(mk('text',{x:LW,y:62,'font-size':'8.5',fill:'var(--text3)'},`H act: ${Hb} → post split: ${Ha} (−${Math.round((1-(si.H_after||0)/(si.H_before||1))*100)}%)`));
     if(nodeData._llm_rationale){const rat=(nodeData._llm_rationale||'').slice(0,78)+(nodeData._llm_rationale||'').length>78?'…':'';el.appendChild(mk('text',{x:LW,y:76,'font-size':'8',fill:'#4a5a7a'},escHtml(rat)));}
@@ -830,7 +836,7 @@ function buildHM(arts,nodeData){
     el.appendChild(ov);
 
     // Article label — styled by H like Fig.12 row labels
-    const artLblColor=H_art>.5?'#b0c4e8':H_art>.2?'#8899bb':'#5a6a8a';
+    const artLblColor=H_art>.5?'#b0c4e8':H_art>.2?'#8899bb':'#8e9cbd';
     const artLblWeight=H_art>.5?'500':'400';
     el.appendChild(mk('text',{x:LW-5,y:y+CH*.68,'font-size':'11','font-weight':artLblWeight,'text-anchor':'end',fill:artLblColor},artLabel(a.id)));
 
@@ -840,7 +846,7 @@ function buildHM(arts,nodeData){
       el.appendChild(mk('text',{x:LW+nL*CW/2,y:y+CH*.68,'font-size':'9','font-style':'italic','text-anchor':'middle',fill:'#7a8aaa'},'Repealed · no text'));
       const bx=LW+nL*CW+5;
       el.appendChild(mk('rect',{x:bx,y:y+4,width:EBW-2,height:CH-9,fill:'rgba(90,106,138,0.08)',rx:'2.5'}));
-      el.appendChild(mk('text',{x:bx+EBW+4,y:y+CH*.68,'font-size':'10',fill:'#5a6a8a','text-anchor':'start'},'—'));
+      el.appendChild(mk('text',{x:bx+EBW+4,y:y+CH*.68,'font-size':'10',fill:'#8e9cbd','text-anchor':'start'},'—'));
     } else {
     LAMF_KEYS.forEach((k,j)=>{
       const v=a.lamf?(a.lamf[k]||0):0;
@@ -946,23 +952,4 @@ updateCount(NODES.length);
   if(!handle||!sf)return;
   let drag=false,sy=0,sh=0;
   handle.addEventListener('mousedown',e=>{drag=true;sy=e.clientY;sh=sf.offsetHeight;document.body.style.cursor='ns-resize';e.preventDefault();});
-  document.addEventListener('mousemove',e=>{if(!drag)return;const h=Math.max(60,Math.min(sh+(e.clientY-sy),window.innerHeight*.72));sf.style.height=h+'px';});
-  document.addEventListener('mouseup',()=>{drag=false;document.body.style.cursor='';});
-  handle.addEventListener('mouseenter',()=>handle.style.background='var(--border2)');
-  handle.addEventListener('mouseleave',()=>handle.style.background='var(--border)');
-})();
-
-// ── Data loading ──────────────────────────────────────────────────────────────
-fetch('heatmaps.json?v='+Date.now()).then(r=>r.json()).then(data=>{window.__HEATMAPS__=data;if(typeof window.__onHeatmapsLoaded==='function')window.__onHeatmapsLoaded(data);}).catch(e=>console.warn('heatmaps.json:',e));
-
-fetch('splits.json?v='+Date.now()).then(r=>r.json()).then(data=>{
-  SPLITS_DATA=data;
-  SPLIT_CELEXES=new Set(Object.keys(data.splits||{}));
-  updateSplitBanner();
-  if(GRAPH_MODE==='prima')addWillSplitRings();
-  document.getElementById('gl-split-legend').style.display='block';
-  console.log('✓ splits.json: '+SPLIT_CELEXES.size+' split, '+((data.edges_after||[]).length)+' archi DOPO');
-}).catch(e=>console.warn('splits.json non trovato (esegui notebook 05):',e));
-</script>
-</body>
-</html>
+  document.addEventListener('mousemove',e=>{
