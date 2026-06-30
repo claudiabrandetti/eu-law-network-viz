@@ -3,4 +3,3 @@ __pycache__/
 .env
 texts_checkpoint.csv
 nodes_texts.csv
-.claude
