@@ -27,10 +27,11 @@ ROOT_DIR   = os.path.dirname(SCRIPT_DIR)
 
 # ── Data ──────────────────────────────────────────────────────────────────────
 hyb = pd.read_csv(os.path.join(ROOT_DIR, 'data', 'output', 'appalti_it', 'nodes_hybridity.csv'))
-# Robust cleanup: drop spurious empty rows (e.g. trailing NaN row, fully-abrogated
-# acts with no celex) and coerce the score to numeric so the mean/median never NaN.
-hyb = hyb[hyb['celex'].notna()].copy()
-hyb['hybridity_score'] = pd.to_numeric(hyb['hybridity_score'], errors='coerce').fillna(0.0)
+# Keep graph nodes with no classified provisions out of the entropy summary:
+# for those acts H is undefined, rather than zero.
+hyb = hyb[hyb['celex'].notna() & (hyb['n_articles'] > 0)].copy()
+hyb['hybridity_score'] = pd.to_numeric(hyb['hybridity_score'], errors='coerce')
+hyb = hyb.dropna(subset=['hybridity_score'])
 hyb = hyb.reset_index(drop=True)
 
 scores = hyb['hybridity_score'].values
@@ -39,6 +40,7 @@ med_h  = float(np.median(scores))
 max_i  = int(hyb['hybridity_score'].idxmax())
 max_v  = float(hyb.loc[max_i, 'hybridity_score'])
 max_cx = str(hyb.loc[max_i, 'celex'])
+max_label = 'D.Lgs. 59/2010' if max_cx == 'dlgs_59_2010' else max_cx
 
 print('=' * 50)
 print(f'N = {len(scores)}')
@@ -87,7 +89,7 @@ ax.text(1.02, med_h + 0.013, f'Median = {med_h:.3f}',
 
 # Annotation: highest-hybridity act — placed above the violin body (clear of data)
 ax.annotate(
-    f'{max_cx} ({max_v:.3f})',
+    f'{max_label} ({max_v:.3f})',
     xy=(jitter[max_i], max_v),
     xytext=(-0.46, max_v + 0.03),
     fontsize=7.5, fontfamily='serif', color='#1a3a5c',
@@ -95,7 +97,7 @@ ax.annotate(
     ha='left', va='bottom', clip_on=False,
 )
 
-ax.set_ylabel('Act-level hybridity $H_{\\mathrm{loc}}$', fontsize=10, fontfamily='serif')
+ax.set_ylabel('Act-level hybridity $H_{\\mathrm{loc}}$', fontsize=9, fontfamily='serif')
 ax.set_xlim(-0.50, 0.50)
 ax.set_ylim(-0.02, 1.02)
 ax.set_xticks([])
@@ -105,13 +107,13 @@ for sp in ['top', 'right', 'bottom']:
 ax.spines['left'].set_color('#aaaaaa')
 ax.spines['left'].set_linewidth(0.8)
 
-# Legend (bottom-left) — line samples for mean and median
+# Legend — keep it in the empty lower-right corner, away from the violin.
 legend_handles = [
     Line2D([0], [0], color='#d4691e', lw=1.8, linestyle='--', label=f'Mean ({mean_h:.3f})'),
     Line2D([0], [0], color='#2e8b57', lw=2.0, linestyle='-',  label=f'Median ({med_h:.3f})'),
 ]
-ax.legend(handles=legend_handles, loc='lower left', fontsize=8,
-          frameon=False, handlelength=2.2, borderaxespad=0.8)
+ax.legend(handles=legend_handles, loc='lower left', bbox_to_anchor=(1.02, 0.015),
+          fontsize=8, frameon=False, handlelength=2.2, borderaxespad=0.0)
 
 fig.tight_layout()
 

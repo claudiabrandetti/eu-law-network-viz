@@ -32,8 +32,8 @@ plt.rcParams.update({
 
 TIER_NAMES   = ['L1', 'L2', 'L3', 'L4']
 TIER_HEX     = {'L1': '#4f8ef7', 'L2': '#b090e0', 'L3': '#3a9c6e', 'L4': '#c85c3a'}
-TIER_LABELS  = ['L1 — Framework', 'L2 — Operational',
-                'L3 — Technical standards', 'L4 — Enforcement']
+TIER_LABELS  = ['L1 - Framework', 'L2 - Operational',
+                'L3 - Supervisory convergence', 'L4 - Enforcement']
 BLOCK_TITLES = {
     'L1':   'L1 block — general framework',
     'L23':  'L2/L3 block — operational rules',

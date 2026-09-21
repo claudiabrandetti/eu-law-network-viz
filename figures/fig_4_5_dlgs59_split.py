@@ -3,8 +3,8 @@
 Figure 4.5 — D.Lgs. 59/2010: Lamfalussy tier composition before and after splitting.
 
 Four horizontal stacked-bar rows:
-  Row 0  Intact act   — aggregate lamf distribution over all 86 articles
-  Row 1  L1 block     — general framework  (36 art.)
+  Row 0  Intact act   — 86 retrieved articles, 84 classified
+  Row 1  L1 block     — general framework  (34 art.)
   Row 2  L23 block    — operational rules  (39 art.)
   Row 3  L4 block     — enforcement        (11 art.)
 
@@ -32,8 +32,8 @@ plt.rcParams.update({
 
 TIER_NAMES   = ['L1', 'L2', 'L3', 'L4']
 TIER_HEX     = {'L1': '#4f8ef7', 'L2': '#b090e0', 'L3': '#3a9c6e', 'L4': '#c85c3a'}
-TIER_LABELS  = ['L1 — Framework', 'L2 — Operational',
-                'L3 — Technical standards', 'L4 — Enforcement']
+TIER_LABELS  = ['L1 - Framework', 'L2 - Operational',
+                'L3 - Supervisory convergence', 'L4 - Enforcement']
 BLOCK_TITLES = {
     'L1':   'L1 block — general framework',
     'L23':  'L2/L3 block — operational rules',
@@ -66,7 +66,7 @@ if s > 0:
 # Build row list
 rows = []
 rows.append({
-    'label': f'Intact act\n({n_total} art.)',
+    'label': f'Intact act\n({n_sub} art.)',
     'bold':  True,
     'vals':  intact_vals,
     'H':     H_intact,
@@ -87,14 +87,15 @@ for b in sp['splits'][CELEX]['blocks']:
         'H':     float(b['H_block']),
     })
 
-print(f'Intact act: n={n_total}  H={H_intact:.4f}  lamf={[round(v,1) for v in intact_vals]}')
+print(f'Intact act: classified n={n_sub}  retrieved n={n_total}  '
+      f'H={H_intact:.4f}  lamf={[round(v,1) for v in intact_vals]}')
 for rd in rows[1:]:
     label_short = rd['label'].split('\n')[0]
     print(f'  {label_short:<35} H={rd["H"]:.4f}  lamf={[round(v,1) for v in rd["vals"]]}')
 
 # ── Figure ────────────────────────────────────────────────────────────────────
 N   = len(rows)
-fig, ax = plt.subplots(figsize=(7.5, 0.80 * N + 1.8))
+fig, ax = plt.subplots(figsize=(7.8, 0.86 * N + 2.0))
 
 BAR_H    = 0.54
 # y-positions: intact at top, then blocks descending
@@ -112,21 +113,21 @@ for rd, yp in zip(rows, y_pos):
             ax.text(left + v / 2, yp,
                     f'{v:.0f}%',
                     ha='center', va='center',
-                    fontsize=8.5, fontfamily='serif',
+                    fontsize=10.0, fontfamily='serif',
                     color='white', fontweight='semibold', zorder=3)
         left += v
 
     # H label on right
     ax.text(103, yp, f'H = {rd["H"]:.3f}',
-            ha='left', va='center', fontsize=8.0, fontfamily='serif',
+            ha='left', va='center', fontsize=9.5, fontfamily='serif',
             color='#222222',
             fontweight='bold' if rd['bold'] else 'normal')
 
     # Row label on left
     ax.text(-2, yp, rd['label'],
-            ha='right', va='center', fontsize=8.0, fontfamily='serif',
+            ha='right', va='center', fontsize=9.5, fontfamily='serif',
             color='#111111',
-            fontweight='bold' if rd['bold'] else 'normal')
+            fontweight='bold' if rd['bold'] else 'normal', linespacing=1.0)
 
 # Thin separator between intact row and blocks
 ax.axhline(y=y_pos[0] - 0.48, color='#cccccc', linewidth=0.8, zorder=1)
@@ -134,10 +135,10 @@ ax.axhline(y=y_pos[0] - 0.48, color='#cccccc', linewidth=0.8, zorder=1)
 # ── Axes ──────────────────────────────────────────────────────────────────────
 ax.set_xlim(-2, 116)
 ax.set_ylim(-0.65, N - 0.35)
-ax.set_xlabel('Lamfalussy tier composition', fontsize=9.5, fontfamily='serif')
+ax.set_xlabel('Lamfalussy tier composition', fontsize=11.0, fontfamily='serif')
 ax.set_xticks([0, 25, 50, 75, 100])
 ax.set_xticklabels(['0%', '25%', '50%', '75%', '100%'],
-                   fontsize=8.0, fontfamily='serif')
+                   fontsize=9.5, fontfamily='serif')
 ax.set_yticks([])
 for sp in ['top', 'right', 'left']:
     ax.spines[sp].set_visible(False)
@@ -148,7 +149,7 @@ ax.spines['bottom'].set_linewidth(0.8)
 legend_patches = [mpatches.Patch(color=TIER_HEX[k], label=lbl)
                   for k, lbl in zip(TIER_NAMES, TIER_LABELS)]
 ax.legend(handles=legend_patches, loc='lower center', ncol=2,
-          fontsize=7.5, frameon=False, bbox_to_anchor=(0.42, -0.22))
+          fontsize=10.0, frameon=False, bbox_to_anchor=(0.42, -0.28))
 
 fig.tight_layout()
 

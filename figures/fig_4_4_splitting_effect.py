@@ -3,7 +3,7 @@
 Figure 4.4 — Dumbbell plot: act-level H_loc before vs. after splitting.
 
 One row per split act, sorted by H_improvement descending.
-Top row shows the network-wide mean (all 32 acts, before / all 53 acts, after).
+Top row shows the paired mean over the 31 original acts with defined H.
 
 Data: splits.json  (root copy produced by nb05)
 """
@@ -70,7 +70,7 @@ N     = len(rows)
 y_act = list(range(N - 1, -1, -1))
 Y_NET = N + 0.8
 
-print(f'Acts: {N}  network mean: {net_bef:.4f} -> {net_aft:.4f}  (-{net_imp:.1%})')
+print(f'Acts: {N}  paired act-level mean: {net_bef:.4f} -> {net_aft:.4f}  (-{net_imp:.1%})')
 for lbl, hb, ha, hi in zip(labels, h_before, h_after, h_improv):
     print(f'  {lbl:<22}  {hb:.3f} -> {ha:.3f}  (-{hi:.1%})')
 
@@ -78,41 +78,41 @@ for lbl, hb, ha, hi in zip(labels, h_before, h_after, h_improv):
 fig_h = 0.44 * (N + 2) + 1.4
 fig, ax = plt.subplots(figsize=(6.5, fig_h))
 
-# Background stripe for network-mean row
+# Background stripe for paired act-level mean row
 ax.axhspan(Y_NET - 0.48, Y_NET + 0.48, color='#f0f0f0', zorder=0)
 
 # Per-act dumbbells
 for ypos, hb, ha, hi in zip(y_act, h_before, h_after, h_improv):
     ax.plot([ha, hb], [ypos, ypos], color='#cccccc', lw=1.4, zorder=1)
-    ax.scatter([hb], [ypos], color=COL_BEF, s=52, zorder=3, linewidths=0)
-    ax.scatter([ha], [ypos], color=COL_AFT, s=52, zorder=3, linewidths=0)
+    ax.scatter([hb], [ypos], color=COL_BEF, s=58, zorder=3, linewidths=0)
+    ax.scatter([ha], [ypos], color=COL_AFT, s=58, zorder=3, linewidths=0)
     ax.text(hb + 0.013, ypos, f'−{hi:.1%}',
-            va='center', ha='left', fontsize=7.0, fontfamily='serif', color='#444444')
+            va='center', ha='left', fontsize=8.4, fontfamily='serif', color='#333333')
 
-# Network-mean row
+# Paired act-level mean row
 ax.plot([net_aft, net_bef], [Y_NET, Y_NET], color='#cccccc', lw=1.6, zorder=1)
 ax.scatter([net_bef], [Y_NET], color=COL_BEF, s=64, marker='D', zorder=3, linewidths=0)
 ax.scatter([net_aft], [Y_NET], color=COL_AFT, s=64, marker='D', zorder=3, linewidths=0)
 ax.text(net_bef + 0.013, Y_NET, f'−{net_imp:.1%}',
-        va='center', ha='left', fontsize=7.5, fontfamily='serif',
+        va='center', ha='left', fontsize=9.0, fontfamily='serif',
         color='#222222', fontweight='bold')
 
-# Y-axis ticks: acts + network mean
+# Y-axis ticks: acts + paired act-level mean
 all_y      = [Y_NET] + y_act
-all_labels = ['Network mean'] + labels
+all_labels = ['Paired act-level mean'] + labels
 ax.set_yticks(all_y)
-ax.set_yticklabels(all_labels, fontsize=8.0, fontfamily='serif')
+ax.set_yticklabels(all_labels, fontsize=9.4, fontfamily='serif')
 for tick, lbl in zip(ax.get_yticklabels(), all_labels):
-    if lbl == 'Network mean':
+    if lbl == 'Paired act-level mean':
         tick.set_fontweight('bold')
-        tick.set_fontsize(8.5)
+        tick.set_fontsize(10.0)
 
 # X-axis
 x_max = max(h_before + [net_bef]) + 0.17
-ax.set_xlabel('Act-level hybridity $H_{\\mathrm{loc}}$', fontsize=9, fontfamily='serif')
+ax.set_xlabel('Act-level hybridity $H_{\\mathrm{loc}}$', fontsize=10.5, fontfamily='serif')
 ax.set_xlim(-0.02, x_max)
 ax.set_ylim(-0.65, Y_NET + 0.6)
-ax.tick_params(axis='x', labelsize=8)
+ax.tick_params(axis='x', labelsize=9.3)
 
 # Legend
 ax.legend(handles=[
@@ -120,7 +120,7 @@ ax.legend(handles=[
            markersize=7, label='$H_{\\mathrm{loc}}$ before splitting'),
     Line2D([0], [0], marker='o', color='w', markerfacecolor=COL_AFT,
            markersize=7, label='$H_{\\mathrm{loc}}$ after splitting'),
-], loc='lower left', fontsize=8.0, frameon=False)
+], loc='lower left', fontsize=9.2, frameon=False)
 
 ax.spines['left'].set_visible(False)
 ax.spines['top'].set_visible(False)

@@ -163,11 +163,11 @@ fig = plt.figure(figsize=(7.0, 10.0))
 gs = gridspec.GridSpec(
     2, 3,
     figure       = fig,
-    width_ratios = [0.10, 1.0, 0.30],
+    width_ratios = [0.15, 1.0, 0.34],
     height_ratios= [1.0,  0.025],
     wspace       = 0.0,
     hspace       = 0.015,
-    left=0.03, right=0.97, top=0.865, bottom=0.06,
+    left=0.03, right=0.97, top=0.945, bottom=0.065,
 )
 
 ax_book  = fig.add_subplot(gs[0, 0])   # Book band
@@ -190,13 +190,14 @@ ax_heat.imshow(
 
 # Column headers at top, coloured by tier
 ax_heat.set_xticks([0, 1, 2, 3])
-ax_heat.set_xticklabels(TIER_COL_LABELS, fontsize=7.0, fontfamily='serif')
+ax_heat.set_xticklabels(TIER_COL_LABELS, fontsize=10.0, fontfamily='serif')
 ax_heat.xaxis.set_ticks_position('top')
 ax_heat.xaxis.set_label_position('top')
 for tick, tier in zip(ax_heat.get_xticklabels(), TIER_NAMES):
     tick.set_color(TIER_HEX[tier])
     tick.set_fontweight('semibold')
-ax_heat.tick_params(axis='x', which='both', top=False, length=0, pad=4)
+    tick.set_linespacing(1.15)
+ax_heat.tick_params(axis='x', which='both', top=False, length=0, pad=6)
 
 # Y-axis: article numbers every 20 rows, plus first and last
 ytick_idx = list(range(0, n_rows, 20))
@@ -207,7 +208,7 @@ ytick_idx.sort()
 ax_heat.set_yticks(ytick_idx)
 ax_heat.set_yticklabels(
     [str(int(art_nums[i])) for i in ytick_idx],
-    fontsize=6.0, fontfamily='serif', color='#555555',
+    fontsize=8.0, fontfamily='serif', color='#222222',
 )
 ax_heat.tick_params(axis='y', which='both', left=False, right=False, length=0, pad=3)
 ax_heat.set_ylim(n_rows - 0.5, -0.5)
@@ -242,9 +243,9 @@ for bi, (lo, hi, bname, _) in enumerate(BOOKS):
     ax_book.add_patch(rect)
     mid = (r0 + r1) / 2.0
     ax_book.text(
-        0.5, mid, bname,
+        0.34, mid, bname,
         ha='center', va='center', rotation=90,
-        fontsize=5.5, fontfamily='serif', color='#1a1a1a', zorder=3,
+        fontsize=7.8, fontfamily='serif', color='#111111', zorder=3,
     )
     if bi < len(BOOKS) - 1:
         sep = book_row_ranges[bi + 1][0] - 0.5
@@ -282,7 +283,7 @@ for bi, (lo, hi, bname, _) in enumerate(BOOKS):
         l1_val + 0.7, mid,
         f'{l1_val:.1f}%',
         va='center', ha='left',
-        fontsize=6.5, fontfamily='serif', color='#222222', zorder=4,
+        fontsize=8.5, fontfamily='serif', color='#111111', zorder=4,
     )
 
 # Overall mean reference line (dashed)
@@ -290,18 +291,6 @@ ax_l1.axvline(
     x=overall_mean_l1,
     color=REF_COL, linewidth=0.8, linestyle='--', alpha=0.85, zorder=2,
 )
-# Reference label near the TOP of Book II, in the white space to the right of the
-# dashed line. Placed away from the per-Book value labels (which sit at each Book's
-# mid-point) so it never overlaps the "21.5%" Book II bar label.
-_avg_y = book_row_ranges[1][0] + 6
-ax_l1.text(
-    overall_mean_l1 + 0.8, _avg_y,
-    f'avg {overall_mean_l1:.1f}%',
-    ha='left', va='center',
-    fontsize=5.5, fontfamily='serif', color=REF_COL, style='italic',
-    clip_on=False, zorder=5,
-)
-
 # Book separator lines (carry through from heatmap)
 for bi in range(1, len(BOOKS)):
     sep = book_row_ranges[bi][0] - 0.5
@@ -310,7 +299,7 @@ for bi in range(1, len(BOOKS)):
 # X-axis ticks at bottom only
 ax_l1.set_xticks([0, 10, 20, 30, 40])
 ax_l1.set_xticklabels(['0', '10', '20', '30', '40'],
-                       fontsize=6.0, fontfamily='serif', color='#555555')
+                       fontsize=8.0, fontfamily='serif', color='#222222')
 ax_l1.tick_params(axis='x', which='both', bottom=True, top=False,
                   length=3, direction='out', pad=3)
 ax_l1.tick_params(axis='y', which='both', left=False, right=False, length=0)
@@ -324,9 +313,9 @@ ax_l1.spines['bottom'].set_linewidth(0.6)
 
 # Panel title (aligned with column headers of heatmap)
 ax_l1.set_title(
-    'Mean L1 share\nper Book  (%)',
-    fontsize=6.5, fontfamily='serif', color='#111111',
-    pad=6, loc='center',
+    f'Mean L1 share\nper Book (%)\nOverall average: {overall_mean_l1:.1f}%',
+    fontsize=8.3, fontfamily='serif', color='#111111',
+    pad=6, loc='center', linespacing=1.15,
 )
 
 # ── Colorbar strip (under heatmap) ─────────────────────────────────────────────
@@ -345,25 +334,17 @@ for c, tier in enumerate(TIER_NAMES):
     ax_cb.imshow(bar, aspect='auto', origin='upper',
                  extent=[c - 0.45, c + 0.45, 0, 1], zorder=2)
 
-ax_cb.text(-0.48, -0.15, '0 %',   ha='left',  va='top', fontsize=5.5,
-           fontfamily='serif', color='#666666',
+ax_cb.text(-0.48, -0.15, '0 %',   ha='left',  va='top', fontsize=7.8,
+           fontfamily='serif', color='#333333',
            transform=ax_cb.transData, clip_on=False)
-ax_cb.text( 3.48, -0.15, '100 %', ha='right', va='top', fontsize=5.5,
-           fontfamily='serif', color='#666666',
+ax_cb.text( 3.48, -0.15, '100 %', ha='right', va='top', fontsize=7.8,
+           fontfamily='serif', color='#333333',
            transform=ax_cb.transData, clip_on=False)
-ax_cb.text(1.5, -0.38,
+ax_cb.text(1.5, -0.95,
            'Token share per tier  (pale = 0 %, saturated = 100 %)',
-           ha='center', va='top', fontsize=5.5, fontfamily='serif',
-           color='#666666', style='italic',
+           ha='center', va='top', fontsize=10.2, fontfamily='serif',
+           color='#333333', style='italic',
            transform=ax_cb.transData, clip_on=False)
-
-# ── Figure title ───────────────────────────────────────────────────────────────
-fig.text(
-    0.03, 0.958,
-    'D.Lgs. 36/2023 — Lamfalussy tier composition by article',
-    ha='left', va='bottom',
-    fontsize=8.5, fontfamily='serif', color='#111111',
-)
 
 # ── Save ───────────────────────────────────────────────────────────────────────
 out_dir = os.path.join(ROOT_DIR, 'figures')
