@@ -1,0 +1,2 @@
+n_acts_before,n_units_after,n_split_acts,H_before_act_mean,H_after_paired_act_mean,paired_relative_reduction,H_after_unpaired_unit_mean_legacy,legacy_relative_reduction,note
+19,24,4,0.3482109554163274,0.29782166675020394,0.14470908477269795,0.33060361666981214,0.05056514871987186,The paired act-level result is the comparable estimate. The legacy estimate averages a different number of units before and after splitting and is retained only for audit.

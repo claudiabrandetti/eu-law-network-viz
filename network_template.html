@@ -239,6 +239,7 @@ header h1{font-size:12.5px;font-weight:500;letter-spacing:.02em}
     &nbsp;|&nbsp; −<span class="sm-v" id="sm-imp">—</span>%
     &nbsp;|&nbsp; <span class="sm-v" id="sm-na">—</span> nodi
     &nbsp;|&nbsp; <span class="sm-v" id="sm-ns">—</span> split
+    &nbsp;|&nbsp; <span class="sm-v" id="sm-nu">—</span> archi non risolti
   </div>
   <button id="btn-theme" title="Switch to dark theme" style="margin-left:auto;background:none;border:1px solid var(--border2);border-radius:3px;color:var(--text3);font-size:13px;padding:2px 8px;cursor:pointer;transition:color .15s,border-color .15s;flex-shrink:0;line-height:1.5">☾</button>
 </header>
@@ -575,7 +576,7 @@ function switchMode(mode){
 
 function updateCount(n){const hc=document.getElementById('h-count');if(!hc)return;const nEU=currentNodes().filter(n=>n.eu).length;hc.textContent=`${n} atti (${n-nEU} IT · ${nEU} EU)${GRAPH_MODE==='dopo'&&SPLITS_DATA?' · '+SPLITS_DATA.meta.n_split+' split':''}`;}
 
-function updateSplitBanner(){if(!SPLITS_DATA)return;const m=SPLITS_DATA.meta;const Hb=(m.H_local_before??m.H_before)??0;const Ha=(m.H_local_after??m.H_after)??0;const imp=(m.H_local_improvement??m.H_improvement)??0;document.getElementById('sm-hb').textContent=Hb.toFixed(4);document.getElementById('sm-ha').textContent=Ha.toFixed(4);document.getElementById('sm-imp').textContent=Math.round(imp*100);document.getElementById('sm-na').textContent=m.n_acts_after;document.getElementById('sm-ns').textContent=m.n_split;}
+function updateSplitBanner(){if(!SPLITS_DATA)return;const m=SPLITS_DATA.meta;const Hb=(m.H_local_before??m.H_before)??0;const Ha=(m.H_local_after??m.H_after)??0;const imp=(m.H_local_improvement??m.H_improvement)??0;document.getElementById('sm-hb').textContent=Hb.toFixed(4);document.getElementById('sm-ha').textContent=Ha.toFixed(4);document.getElementById('sm-imp').textContent=Math.round(imp*100);document.getElementById('sm-na').textContent=m.n_acts_after;document.getElementById('sm-ns').textContent=m.n_split;document.getElementById('sm-nu').textContent=m.n_unresolved_edges??0;}
 
 // ── Split focus panel ─────────────────────────────────────────────────────────
 function renderSplitFocus(d){
@@ -992,7 +993,7 @@ fetch('splits.json?v='+Date.now()).then(r=>r.json()).then(data=>{
   updateSplitBanner();
   if(GRAPH_MODE==='prima')addWillSplitRings();
   document.getElementById('gl-split-legend').style.display='block';
-  console.log('✓ splits.json: '+SPLIT_CELEXES.size+' split, '+((data.edges_after||[]).length)+' archi DOPO');
+  console.log('✓ splits.json: '+SPLIT_CELEXES.size+' split, '+((data.edges_after||[]).length)+' archi DOPO, '+((data.unresolved_edges||[]).length)+' non risolti');
 }).catch(e=>console.warn('splits.json non trovato (esegui notebook 05):',e));
 // ── Theme toggle ──────────────────────────────────────────────────────────────
 (function(){
