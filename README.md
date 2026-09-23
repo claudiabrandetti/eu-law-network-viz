@@ -24,6 +24,9 @@ The FDI corpus contains 19 acts, 22 relations and 162 reaggregated articles.
 Four deterministic splits are accepted. The comparable paired act-level
 calculation is 0.3482 to 0.2978 (a 14.5% reduction). The article- and act-level
 results are stored under `data/output/fdi_screening/reaggregated/`.
+The top-level `segments_lamfalussy*.csv` and `nodes_lamfalussy.csv` files are
+cached fragment-level inputs to that reaggregation, not final FDI statistics.
+Obsolete fragment-weighted summaries and split files have been removed.
 
 ## Pipeline and cached results
 
