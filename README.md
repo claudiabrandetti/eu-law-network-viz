@@ -117,6 +117,9 @@ arbitrary fallback.
 
 ### Static website
 
+The production visualization is available at
+[eu-law-network-viz-a5nc.vercel.app](https://eu-law-network-viz-a5nc.vercel.app/).
+
 The `public/` directory contains only the files needed to display the
 procurement visualization: `index.html`, `heatmaps.json`, and `splits.json`.
 Refresh it whenever the source visualization or either JSON file changes:
@@ -131,10 +134,10 @@ Directory** to `public`, **Framework Preset** to **Other**, and override the
 default (do not set it to `public` again, because `public` is now the project
 root). This keeps Vercel from treating the repository-level `requirements.txt`
 as a Python application. The root-level `vercel.json` alone did not prevent
-Python detection in this project. Deploy the branch containing `public/` for a
-preview; the default `main` branch will not contain the site until that branch
-is merged. The deployed site serves cached results; classification and
-splitting are performed in the notebooks, not by the site.
+Python detection in this project. The production deployment tracks `main`;
+other branches can be used for previews. The deployed site serves cached
+results; classification and splitting are performed in the notebooks, not by
+the site.
 
 ## Validation scope
 
