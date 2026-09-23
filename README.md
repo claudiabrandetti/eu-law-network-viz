@@ -115,6 +115,21 @@ The pre-split view contains 31 acts and 88 relations. The post-split banner also
 reports unresolved block-level relations instead of hiding them behind an
 arbitrary fallback.
 
+### Static website
+
+The `public/` directory contains only the files needed to display the
+procurement visualization: `index.html`, `heatmaps.json`, and `splits.json`.
+Refresh it whenever the source visualization or either JSON file changes:
+
+```bash
+python scripts/build_public.py
+```
+
+The repository's `vercel.json` sets `public/` as the deployment output
+directory. In Vercel, import this repository with the **Other** framework
+preset and no build command. The deployed site serves the cached results;
+classification and splitting are performed in the notebooks, not by the site.
+
 ## Validation scope
 
 Legal expertise informed the functional schema and prompt design. The
