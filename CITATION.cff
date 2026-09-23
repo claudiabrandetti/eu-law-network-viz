@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this code or data, please cite the associated paper and repository release."
+title: "EU law network functional hybridity analysis"
+type: software
+authors:
+  - family-names: Brandetti
+    given-names: Claudia
+repository-code: "https://github.com/claudiabrandetti/eu-law-network-viz"
+abstract: >-
+  Cached classifications, deterministic analyses, provenance records, and an
+  interactive network visualization for functional hybridity in EU and Italian
+  legislation.

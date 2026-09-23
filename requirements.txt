@@ -7,3 +7,7 @@ python-dotenv
 pymupdf
 pdfplumber
 requests
+matplotlib
+scikit-learn
+sentence-transformers
+jupyter
