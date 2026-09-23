@@ -22,43 +22,31 @@ kept only for provenance and are marked as excluded in the source manifest.
 
 The FDI corpus contains 19 acts, 22 relations and 162 reaggregated articles.
 Four deterministic splits are accepted. The comparable paired act-level
-calculation is 0.3482 to 0.2978 (a 14.5% reduction). The previously stored 5.1%
-figure compared 19 acts before splitting with 24 units after splitting; it is
-retained in `reaggregation_audit.csv` only to make that earlier calculation
-traceable.
+calculation is 0.3482 to 0.2978 (a 14.5% reduction). The article- and act-level
+results are stored under `data/output/fdi_screening/reaggregated/`.
 
-## Reproduce the reported analyses without an API
+## Pipeline and cached results
 
-The repository stores the model classifications and split-validation decisions
-used for the study. The final results can therefore be rebuilt without access
-to GPT-4.1-mini and without an OpenAI API key.
+The repository already contains the classifications and analytical outputs
+used in the paper. The notebook sequence is the authoritative pipeline:
 
-```bash
-python -m venv .venv
-# Linux/macOS: source .venv/bin/activate
-# Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python scripts/reproduce_cached.py
-```
+1. notebooks 00--03 construct and enrich the corpus;
+2. notebook 04 classifies the provisions and calculates article-, act-, and
+   network-level hybridity;
+3. for FDI, the reaggregation cell at the end of notebook 04 reconstructs the
+   162 legal articles from the cached paragraph fragments;
+4. notebook 05 reads those reaggregated FDI outputs before applying splitting.
 
-The cached reproduction path:
+The reaggregation and subsequent calculations are deterministic and make no
+model call. Re-running the original classification and validation cells does
+require API access and constitutes a new experiment. The reusable mathematical
+functions used by the deterministic cells are in `scripts/analysis_core.py`.
 
-1. reconstructs the FDI article-level data from cached fragment labels;
-2. removes the excluded procurement act from all final derived artefacts;
-3. rebuilds the procurement visualization and post-split graph;
-4. runs diffusion and splitting sensitivity analyses;
-5. creates the future independent-review sample;
-6. creates source snapshots and SHA-256 manifests;
-7. runs the automated verification suite.
-
-No script under `scripts/` imports the OpenAI client or sends model requests.
-The original notebooks remain as the historical full pipeline and include API
-stages. They are not required to reproduce the reported outputs.
-
-To run only the checks:
+The supplementary deterministic outputs can be refreshed with:
 
 ```bash
-python -m unittest discover -s tests -v
+python scripts/sensitivity_analysis.py
+python scripts/build_provenance_manifest.py
 ```
 
 ## Original notebooks
@@ -75,14 +63,18 @@ python -m unittest discover -s tests -v
 
 Running the model stages again is a new experiment and may not reproduce the
 cached classifications exactly. The exact model snapshot and
-`system_fingerprint` were not retained; see `docs/MODEL_PROVENANCE.md`.
+`system_fingerprint` were not retained. The stored records identify the model
+alias `gpt-4.1-mini`, temperature zero, prompt, schema and cached responses.
 
 ## Post-split relations
 
 The historical notebook sent an act-level relation to the first split block
 when it could not identify the citing article. This fallback has been removed.
 Relations with a cached article match or cached target resolution remain in the
-post-split graph. Nineteen remaining relations are stored in
+post-split graph. Five previously flagged relations connect unsplit acts and
+therefore remain unchanged. Four more identify their destination article
+explicitly and are routed deterministically. The ten genuinely act-level or
+otherwise non-attributable relations are stored in
 `data/output/appalti_it/unresolved_edges.csv` and excluded from block-level
 diffusion until they can be reviewed. This does not affect the pre-split
 network or the paired local splitting result.
@@ -125,9 +117,8 @@ arbitrary fallback.
 Legal expertise informed the functional schema and prompt design. The
 repository also contains construct-validation outputs and a qualitative audit
 trail. It does not contain a completed, independently annotated multi-expert
-gold standard. `data/review/independent_annotation_sample.csv` is an unfilled
-template for such future work and must not be cited as completed validation.
-See `docs/VALIDATION_SCOPE.md`.
+gold standard and therefore does not claim clause-level precision, recall or
+inter-annotator agreement.
 
 ## Author and acknowledgments
 

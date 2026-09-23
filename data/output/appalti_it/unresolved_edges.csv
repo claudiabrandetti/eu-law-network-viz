@@ -1,17 +1,8 @@
 source_act,target_act,type,family,w,resolution_status,reason
 dlgs_50_2016,dlgs_36_2023,REPEALS,mod,2,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
 dlgs_56_2017,dlgs_33_2013,CITES,ref,1,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
-dlgs_56_2017,dlgs_163_2006,CITES,ref,1,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
-l_11_2016,dlgs_163_2006,CITES,ref,1,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
-l_241_1990,dlgs_163_2006,CITES,ref,1,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
-l_190_2012,dlgs_33_2013,BASED_ON,hier,2,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
 l_190_2012,dlgs_97_2016,CITES,ref,1,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
-dlgs_218_2012,l_136_2010,CITES,ref,1,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
-dlgs_218_2012,dlgs_163_2006,CITES,ref,1,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
-dlgs_229_2011,dlgs_33_2013,CITES,ref,1,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
-dlgs_229_2011,dlgs_163_2006,CITES,ref,1,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
 dlgs_229_2011,l_136_2010,BASED_ON,hier,2,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
-dl_135_2018,l_145_2018,BASED_ON,hier,2,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
 32014L0023,dlgs_36_2023,IMPLEMENTED_BY,recep,3,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
 32014L0024,dlgs_36_2023,IMPLEMENTED_BY,recep,3,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
 32014L0025,dlgs_36_2023,IMPLEMENTED_BY,recep,3,unresolved_no_article_reference,The stored act-level relation does not identify a source article; no split block is assigned without additional legal review.
