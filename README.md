@@ -125,9 +125,11 @@ Refresh it whenever the source visualization or either JSON file changes:
 python scripts/build_public.py
 ```
 
-The repository's `vercel.json` sets `public/` as the deployment output
-directory. In Vercel, import this repository with the **Other** framework
-preset and no build command. The deployed site serves the cached results;
+The repository's `vercel.json` selects the **Other** framework preset, skips
+the build step, and serves only `public/`. This prevents Vercel from treating
+the root `requirements.txt` as a Python web application. Deploy the branch
+containing `public/` for a preview; the default `main` branch will not contain
+the site until that branch is merged. The deployed site serves cached results;
 classification and splitting are performed in the notebooks, not by the site.
 
 ## Validation scope
